@@ -1,0 +1,57 @@
+{
+  "name": "Jumga",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "cross-env TEST=unit ava ./test/specs/**/*",
+    "test:e2e": "cross-env TEST=e2e ava ./test/e2e/**/*"
+  },
+  "dependencies": {
+    "@nuxt/content": "^1.5.0",
+    "@nuxtjs/auth": "^4.9.1",
+    "@nuxtjs/axios": "^5.12.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "express-validator": "^6.6.1",
+    "flutterwave-node": "^1.2.0",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.7",
+    "multer": "^1.4.2",
+    "nuxt": "^2.14.7",
+    "vee-validate": "^3.4.0",
+    "vuelidate": "^0.7.5"
+  },
+  "devDependencies": {
+    "@ava/babel": "^1.0.1",
+    "@nuxtjs/vuetify": "^1.11.2",
+    "@vue/test-utils": "^1.0.3",
+    "ava": "^3.11.0",
+    "babel-plugin-module-resolver": "^4.0.0",
+    "cross-env": "^7.0.2",
+    "jsdom": "^16.3.0",
+    "jsdom-global": "^3.0.2",
+    "require-extension-hooks": "^0.3.3",
+    "require-extension-hooks-babel": "^1.0.0",
+    "require-extension-hooks-vue": "^3.0.0"
+  },
+  "jumga_rates": {
+    "sold_goods": "2.5%",
+    "dispatch_ride_fee": "20%",
+    "shop_approval_rate": "$20",
+    "each_shop_has_a_dispatch_rider": true,
+    "countries": [
+      "ghana",
+      "nigeria",
+      "kenya",
+      "uk"
+    ]
+  },
+  "browser": {
+    "fs": false
+  }
+}

@@ -1,0 +1,17 @@
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+const Transactions = new Schema(
+  {
+    name: { type: String, required: true },
+    ref: { type: String, required: true },
+    status: { type: Boolean, required: true },
+    remark: { type: String },
+    User: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    amount: { type: Number, required: true },
+    meta: { type: Map, of: String }
+  },
+  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
+);
+
+export default mongoose.model("Transactions", Transactions);

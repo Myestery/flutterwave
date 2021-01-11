@@ -1,0 +1,7 @@
+{
+    "workspace.isHidden": false,
+    "git.ignoreLimitWarning": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 6000,
+    "editor.fontSize": 16
+}
