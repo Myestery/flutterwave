@@ -28,10 +28,24 @@
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <v-text-field label="Price in Dollars*" required type="number"></v-text-field>
+                      <v-text-field
+                        label="Price in Dollars*"
+                        required
+                        type="number"
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-text-field label="Description*" required></v-text-field>
+                      <v-file-input
+                        label="Product Image"
+                        filled
+                        prepend-icon="mdi-camera"
+                      ></v-file-input>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        label="Description*"
+                        required
+                      ></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -39,7 +53,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary"  text @click="dialog = false">
+                <v-btn color="primary" text @click="dialog = false">
                   SAVE
                 </v-btn>
                 <v-btn color="danger" text @click="dialog = false">
@@ -119,7 +133,7 @@
 export default {
   data: () => ({
     range: [0, 10000],
-    dialog:false,
+    dialog: false,
     page: 1,
     breadcrums: [
       {
