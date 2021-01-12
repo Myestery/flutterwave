@@ -352,6 +352,7 @@
 <script>
 import Vuex from "vuex";
 export default {
+   auth: false,
   // async asyncData({
   //   isDev,
   //   route,

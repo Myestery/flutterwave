@@ -34,6 +34,8 @@ export const UserSchema = new Schema({
   account: {
     type: Map,
     of: String,
-  }
+  },
+  shop:{ type: Schema.Types.ObjectId, ref: "Shop" },
 });
 export default mongoose.model("User", UserSchema);
+

@@ -90,6 +90,7 @@
 </style>
 <script>
     export default {
+       auth: false,
         data: () => ({
             range: [0, 10000],
             select:'Popularity',

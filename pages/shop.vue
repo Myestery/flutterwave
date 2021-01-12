@@ -101,12 +101,16 @@
                   </v-img>
                   <v-card-text class="text--primary">
                     <div>
-                      <a href="/product" style="text-decoration: none">{{
+                      <router-link :to="`/product/${pro.id}`" style="text-decoration: none">{{
                         pro.name
-                      }}</a>
+                      }}</router-link>
                     </div>
                     <div>${{ pro.price }}</div>
                   </v-card-text>
+                  <v-card-actions>
+                      <v-btn @click="edit_dialog = !edit_dialog; active_prod=pro">Edit</v-btn>
+                      <v-btn color="warning">delete</v-btn>
+                  </v-card-actions>
                 </v-card>
               </v-hover>
             </div>
@@ -117,6 +121,59 @@
         </div>
       </div>
     </v-container>
+    <v-dialog v-model="edit_dialog" persistent max-width="600px">
+            <v-card>
+              <v-card-title>
+                <span class="headline">Product Details</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field label="Name*" required :value="active_pro.name"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                      <v-select
+                        :items="['Men', 'Women', 'Children', 'Unisex']"
+                        label="Category*"
+                        required
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                      <v-text-field
+                        label="Price in Dollars*"
+                        required
+                        type="number"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-file-input
+                        label="Product Image"
+                        filled
+                        prepend-icon="mdi-camera"
+                      ></v-file-input>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        label="Description*"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                </v-container>
+                <small>*indicates required field</small>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="edit_dialog = false">
+                  SAVE
+                </v-btn>
+                <v-btn color="danger" text @click="edit_dialog = false">
+                  cancel
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
   </div>
 </template>
 <style>
@@ -134,6 +191,8 @@ export default {
   data: () => ({
     range: [0, 10000],
     dialog: false,
+    edit_dialog:false,
+    active_pro:{},
     page: 1,
     breadcrums: [
       {

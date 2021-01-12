@@ -273,6 +273,7 @@
 </template>
 <script>
 export default {
+     auth: false,
   data: () => ({
     rating: 4.5,
     breadcrums: [

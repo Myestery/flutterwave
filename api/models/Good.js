@@ -15,4 +15,4 @@ export const GoodSchema = new Schema({
     required: [true, "Goods category required"]
   }
 });
-export default mongoose.model("Goods", GoodSchema);
+export default mongoose.model("Good", GoodSchema);

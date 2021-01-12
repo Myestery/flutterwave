@@ -10,7 +10,10 @@ import {
   user,
   edit,
   upload,
-  createShop
+  createShop,
+  getBanks,
+  verifyBank,
+  tester
 } from "../controllers/usersController";
 
 //Register
@@ -29,6 +32,15 @@ router.get("/users/user", user);
 router.put("/users/edit", upload, edit);
 
 //Create a Virtual shop
-router.post("/users/createShop",createShop)
+router.post("/users/createShop", createShop)
+
+//Create a Virtual shop
+router.get("/users/getBanks",getBanks)
+
+//verify a bank exists
+router.post("/users/verify-bank-details",verifyBank)
+
+//tester
+router.get("/users/tester",tester)
 
 export default router;

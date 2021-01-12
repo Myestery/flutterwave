@@ -44,7 +44,9 @@ export default {
    ** Plugins to load before mounting the App
    ** https://nuxtjs.org/guide/plugins
    */
-  plugins: [],
+  plugins: [
+    '~/plugins/flutterwave.js'
+  ],
   /*
    ** Auto import components
    ** See https://nuxtjs.org/api/configuration-components
@@ -62,7 +64,7 @@ export default {
     "@nuxtjs/axios",
     // Doc: https://github.com/nuxt/content
     "@nuxt/content",
-    "@nuxtjs/auth" // enables Nuxt Auth module
+    "@nuxtjs/auth", // enables Nuxt Auth module
   ],
   /*
    ** Axios module configuration
@@ -99,7 +101,9 @@ export default {
    ** Build configuration
    ** See https://nuxtjs.org/api/configuration-build/
    */
-  build: {},
+  build: {
+    transpile:[   "flutterwave-vue-v3"]
+  },
   serverMiddleware: ["~/api/index.js"],
   auth: {
     strategies: {

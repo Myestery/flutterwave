@@ -123,7 +123,7 @@ export default {
           firstname: this.firstname,
           email: this.email,
           password: this.password,
-          country:this.country
+          country:this.country.toLowerCase()
         })
         .then((res) => {
           this.$auth.loginWith("local", {

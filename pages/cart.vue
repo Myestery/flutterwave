@@ -106,7 +106,7 @@
             </template>
           </v-simple-table>
           <div class="text-center">
-            <v-btn class="primary white--text mt-5" outlined>PROCEED TO PAY</v-btn>
+            <v-btn to="/checkout" class="primary white--text mt-5" outlined>PROCEED TO PAY</v-btn>
           </div>
         </v-col>
       </v-row>

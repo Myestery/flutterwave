@@ -18,6 +18,7 @@
     "dotenv": "^8.2.0",
     "express-validator": "^6.6.1",
     "flutterwave-node": "^1.2.0",
+    "flutterwave-vue-v3": "^1.0.2",
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.7",
