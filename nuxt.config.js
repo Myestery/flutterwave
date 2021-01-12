@@ -1,6 +1,9 @@
 import colors from "vuetify/es5/util/colors";
 
 export default {
+  generate: {
+    fallback: true
+  },
   /*
    ** Nuxt rendering mode
    ** See https://nuxtjs.org/api/configuration-mode
@@ -70,7 +73,8 @@ export default {
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  axios: {},
+  axios: {
+  },
   /*
    ** Content module configuration
    ** See https://content.nuxtjs.org/configuration
