@@ -77,7 +77,7 @@
       </v-card-actions>
       <small>
         Already Registered, Click here to
-        <nuxt-link to="login">Log IN</nuxt-link>
+        <nuxt-link to="/login">Log IN</nuxt-link>
       </small>
     </v-card>
   </v-app>

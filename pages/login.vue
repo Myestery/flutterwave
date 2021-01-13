@@ -34,7 +34,7 @@
       </v-card-actions>
       <small>
         Not Registered, Click here to
-        <nuxt-link to="register">Sign UP</nuxt-link>
+        <nuxt-link to="/register">Sign UP</nuxt-link>
       </small>
     </v-card>
   </v-app>
