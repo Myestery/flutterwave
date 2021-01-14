@@ -47,7 +47,6 @@
                 class="input-group--focused"
                 @click:append="showPassword = !showPassword"
               ></v-text-field>
-                <v-select :items="countries" label="Select Country" v-model="country"></v-select>
               <v-text-field
                 :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :rules="confirmPasswordRules"
@@ -60,6 +59,24 @@
                 class="input-group--focused"
                 @click:append="showPassword = !showPassword"
               ></v-text-field>
+                <v-select :items="countries" label="Select Country" 
+                @change="fetchBanks"
+                v-model="country"></v-select>
+              <v-select
+                    :items="banks"
+                    label="Select Bank"
+                    item-text="name"
+                    v-model="bank"
+                    item-value="code"
+                    :rules="nameRules"
+                  ></v-select>
+                   <v-text-field
+                    name="account_number"
+                    label="Your account number"
+                    v-model="account_number"
+                    :rules="nameRules"
+                    type="number"
+                  ></v-text-field>
             </v-container>
           </v-form>
         </v-list-item-content>
@@ -78,6 +95,7 @@
       <small>
         Already Registered, Click here to
         <nuxt-link to="/login">Log IN</nuxt-link>
+        <nuxt-link to="/register-as-merchant">Register as merchant</nuxt-link>
       </small>
     </v-card>
   </v-app>
@@ -104,6 +122,9 @@ export default {
     surname: "",
     country:"",
     confirmPassword: "",
+    account_number:"",
+    banks:[],
+    bank:"",
     countries:[
       "Nigeria",
       "Ghana",
@@ -137,6 +158,13 @@ export default {
           console.log(e);
         });
     },
+    async fetchBanks(country){
+      let banks = await this.$axios.get("/api/users/getBanks",{
+      params: {
+        country: this.country
+      }})
+      this.banks = banks.data.banks
+    }
   },
   mounted() {},
 };

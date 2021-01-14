@@ -6,7 +6,7 @@
 
         <v-toolbar-title style="width: 350px">
           <nuxt-link to="/" class="white--text" style="text-decoration: none"
-            ><v-icon>mdi-shopping</v-icon>&nbsp;Jumga</nuxt-link
+            >Jumga</nuxt-link
           >
         </v-toolbar-title>
         <v-text-field
@@ -18,12 +18,9 @@
           class="hidden-sm-and-down pl-10 ml-4"
         />
         <v-spacer />
-        <v-btn icon to="/account"> 
-          <v-icon>mdi-account-circle</v-icon>
-        </v-btn>
-        <!-- <v-btn icon to="/myShop">
+        <v-btn icon to="/shop"> 
           <v-icon>mdi-shopping</v-icon>
-        </v-btn> -->
+        </v-btn>
         <v-btn icon to="/cart">
           <v-icon>mdi-cart</v-icon>
         </v-btn>

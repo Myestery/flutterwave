@@ -57,17 +57,7 @@
           <v-btn text> Cancel </v-btn>
         </v-stepper-content>
 
-        <v-stepper-content step="2">
-          <v-card>
-            To enable us serve you better and sign up your shop on jumga, You
-            are to pay a one time fee of $20 to proceed with shop creation.
-            <div class="caption">
-              Note: Your shop will be assigned a free dispatch rider after this
-              process
-            </div>
-            <payment-template amount_to_pay="20" currency="$"/>
-          </v-card>
-        </v-stepper-content>
+        
       </v-stepper-items>
     </v-stepper>
   </v-app>
@@ -108,39 +98,10 @@ export default {
     };
   },
   async mounted() {
-    const alphabet = [
-      "a",
-      "b",
-      "c",
-      "d",
-      "e",
-      "f",
-      "g",
-      "h",
-      "i",
-      "j",
-      "k",
-      "l",
-      "m",
-      "n",
-      "o",
-      "p",
-      "q",
-      "r",
-      "s",
-      "t",
-      "u",
-      "v",
-      "w",
-      "x",
-      "y",
-      "z",
-    ];
-    let banks = await this.$axios.get("/api/users/getBanks");
-    this.banks = banks.data.banks.sort(
-      (a, b) =>
-        alphabet.indexOf(b.name.charAt(0)) - alphabet.indexOf(a.name.charAt(0))
-    );
+    let banks = await this.$axios.get(`/api/users/getBanks`,{
+      params: {
+        country: this.country
+      }}).data.banks
   },
   methods: {
     CheckDetails() {

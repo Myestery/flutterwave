@@ -5,7 +5,7 @@ const Transactions = new Schema(
   {
     name: { type: String, required: true },
     ref: { type: String, required: true },
-    status: { type: Boolean, required: true },
+    used: { type: Boolean, required: true },
     remark: { type: String },
     User: { type: Schema.Types.ObjectId, ref: "User", required: true },
     amount: { type: Number, required: true },

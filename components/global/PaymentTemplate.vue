@@ -1,22 +1,48 @@
 <template>
   <div>
-    <v-card color="basil">
+    <v-card color="basil" v-if="status == null">
       <v-card-title class="text-center justify-center py-6">
         <h1 class="font-weight-bold display-2 basil--text">Payment Options</h1>
       </v-card-title>
 
       <v-tabs v-model="tab" grow>
-        <v-tab v-for="card in ['card', 'mpesa', 'Ghana Mobile Money', 'Bank (Nigerian Users Only)']" :key="card">
+        <v-tab
+          v-for="card in [
+            'card',
+            'mpesa',
+            'Ghana Mobile Money',
+            'Bank (Nigerian Users Only)',
+          ]"
+          :key="card"
+        >
           {{ card }}
         </v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
-        <v-tab-item v-for="card in ['card', 'mpesa', 'Ghana Mobile Money', 'Bank (Nigerian Users Only)']" :key="card">
+        <v-tab-item
+          v-for="card in [
+            'card',
+            'mpesa',
+            'Ghana Mobile Money',
+            'Bank (Nigerian Users Only)',
+          ]"
+          :key="card"
+        >
           <v-card color="basil" flat>
             <v-form v-model="s_valid">
               <v-card>
-                <v-card-title> Pay {{currency}}{{amount_to_pay}} with {{card}} </v-card-title>
+                <v-card-title>
+                  Pay {{ currency }}{{ amount_to_pay }} with {{ card }}
+                </v-card-title>
+                <v-alert
+                  v-if="card_has_error"
+                  dismissible
+                  icon="mdi-cancel"
+                  type="error"
+                >
+                  {{ card_error }}
+                </v-alert>
                 <v-row justify="center" xs6 md3>
                   <v-col class="col-12 col-md-4 col-sm-12">
                     <v-text-field
@@ -70,7 +96,14 @@
                   </v-col>
                 </v-row>
                 <v-card-actions>
-                  <v-btn color="info">Pay Now</v-btn>
+                  <v-btn
+                    color="info"
+                    justify-center
+                    block
+                    :disabled="!s_valid"
+                    @click="PassData(types[tab])"
+                    >Pay Now</v-btn
+                  >
                 </v-card-actions>
               </v-card>
             </v-form>
@@ -78,15 +111,120 @@
         </v-tab-item>
       </v-tabs-items>
     </v-card>
+    <v-container style="height: 400px" v-if="status == 'paying'">
+      <v-row class="fill-height" align-content="center" justify="center">
+        <v-col class="subtitle-1 text-center" cols="12">
+          Contacting Flutterwave
+        </v-col>
+        <v-col cols="6">
+          <v-progress-linear
+            color="deep-purple accent-4"
+            indeterminate
+            rounded
+            height="6"
+          ></v-progress-linear>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-row justify="center" v-if="status == 'needs_pin'">
+      <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">ATM PIN Required</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-text-field
+                label="You need to enter your atm pin to continue"
+                hint="ATM pin"
+                persistent-hint
+                v-model="extra.pin"
+                type="password"
+                required
+              ></v-text-field>
+            </v-container>
+            <small>*indicates required field</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="
+                dialog = false;
+                PassData(types[tab],{suggested_auth:'PIN'});
+              "
+            >
+              COntinue
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <v-row justify="center" v-if="status == 'needs_otp'">
+      <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">{{otp_message}}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-text-field
+                label="You need to enter your OTP to continue"
+                hint="one time pin sent to your device"
+                persistent-hint
+                v-model="extra.otp"
+                required
+              ></v-text-field>
+            </v-container>
+            <small>*indicates required field</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="
+                dialog = false;
+                Ready();
+              "
+            >
+              COntinue
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <v-alert
+      v-if="status == 'Charge Complete'"
+      dismissible
+      icon="mdi-check"
+      type="success"
+      prominent
+    >
+      Payment of {{ currency }}{{ amount_to_pay }} was successful
+    </v-alert>
+    <v-container grid-list-xs v-if="status == 'needs_otp_frame'">
+      <iframe :src="url"></iframe>
+    </v-container>
   </div>
 </template>
 <script>
 export default {
-    props:["amount_to_pay","currency"],
+  props: [
+    "amount_to_pay",
+    "currency",
+    "status",
+    "url",
+    "card_error",
+    "card_has_error",
+    "otp_message"
+  ],
   data() {
     return {
       s_valid: false,
-      card_value: "",
+      dialog: true,
+      card_value: "5531886652142950",
       cardRules: [
         (v) =>
           v.toString().length >= 16 || "The 16 digit pin in front of your card",
@@ -95,19 +233,42 @@ export default {
         (v) => v.toString().length == 3 || "The 3 digit pin behind your card",
       ],
       tab: "",
-      cvv: "",
+      cvv: "564",
+      types: ["card", "mpesa", "ghana_mobile_money", "bank_transfer"],
       months: new Array(12).fill(0).map((x, index) => ({
         month: index < 9 ? `0${index + 1}` : index + 1,
         val: index + 1,
       })),
-      years: new Array(11).fill(0).map((x, index) => ({
+      years: new Array(20).fill(0).map((x, index) => ({
         year: 2020 + index,
         val: 20 + index,
       })),
-      card_month: "",
-      card_year: "",
-    nameRules: [(v) => !!v || "This Field is required"],
+      card_month: "9",
+      card_year: "32",
+      nameRules: [(v) => !!v || "This Field is required"],
+      extra: {
+        otp: "",
+        pin: "",
+      },
     };
+  },
+  methods: {
+    PassData(card,more) {
+      this.$emit("pass", {
+        card: this.card_value,
+        card_month: this.card_month,
+        card_year: this.card_year,
+        cvv: this.cvv,
+        type: card,
+        ...this.extra,
+        ...more
+      });
+    },
+    Ready(){
+      this.$emit('finish',{
+        otp:this.extra.otp
+      })
+    }
   },
 };
 </script>

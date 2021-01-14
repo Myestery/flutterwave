@@ -35,6 +35,7 @@
       <small>
         Not Registered, Click here to
         <nuxt-link to="/register">Sign UP</nuxt-link>
+        <nuxt-link to="/register-as-merchant">Sign UP as Seller</nuxt-link>
       </small>
     </v-card>
   </v-app>
