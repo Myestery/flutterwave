@@ -107,6 +107,21 @@ export const promptPayment = async (req, res) => {
         suggested_auth: req.body.suggested_auth
           ? req.body.suggested_auth
           : null,
+        billingcity: req.body.billingcity
+        ? req.body.billingcity
+        : null,
+        billingzip: req.body.billingzip
+        ? req.body.billingzip
+        : null,
+        billingaddress: req.body.billingaddress
+        ? req.body.billingaddress
+        : null,
+        billingstate: req.body.billingstate
+        ? req.body.billingstate
+        : null,
+        billingcountry: req.body.billingcountry
+        ? req.body.billingcountry
+        : null,
         pin: req.body.suggested_auth ? req.body.pin : null,
         redirect_url: `${process.env.APP_URL}/api/receivePayment`,
         lastname: req.body.lastname,
@@ -123,12 +138,30 @@ export const promptPayment = async (req, res) => {
       extra = { ...extra.body };
       switch (extra.message) {
         case "AUTH_SUGGESTION":
-          response.status = `needs_${extra.data.suggested_auth.toLowerCase()}`;
-          response.message = "You need to put a pin for mastercard";
+          if (extra.data.suggested_auth == "NOAUTH_INTERNATIONAL") {
+            response.status = `needs_${extra.data.suggested_auth.toLowerCase()}`;
+            response.message = "You need to add your address for mastercard";
+          } else {
+            response.status = `needs_${extra.data.suggested_auth.toLowerCase()}`;
+            response.message = "You need to put a pin for mastercard";
+          }
+
           break;
         case "V-COMP":
           // if()
           switch (extra.data.chargeResponseMessage) {
+            case "Function Not Permitted to Cardholder":
+              response.status = `card_error`;
+              response.message = extra.data.chargeResponseMessage;
+              break;
+            case "Function Not Permitted to Cardholder":
+              response.status = `card_error`;
+              response.message = extra.data.chargeResponseMessage;
+              break;
+            case "Function Not Permitted to Cardholder":
+              response.status = `card_error`;
+              response.message = extra.data.chargeResponseMessage;
+              break;
             case "Approved. Successful": // this signifies that it needs 3dsecure auth
               response.status = `needs_otp_frame`;
               response.message = extra.data.chargeResponseMessage;
@@ -140,8 +173,24 @@ export const promptPayment = async (req, res) => {
               response.message = extra.data.chargeResponseMessage;
               response.transaction_reference = extra.data.flwRef;
               break;
+          }break;
+            
+        case "Do Not Honour: We're sorry, we cannot charge your card due to bank restrictions. Please contact your bank or financial institution.":
+          response.status = `card_error`;
+          response.message = extra.message;
+          break;
+        case "Fraudulent. Transaction":
+          response.status = `card_error`;
+          response.message = extra.message;
+          break;
+        case "Insufficient Funds: Your card cannot be charged due to insufficient funds. Please try another card or fund your card and try again.":
+          response.status = `card_error`;
+          response.message = extra.message;
+          break;
+        default:
+          response.status = `card_error`;
+          response.message = extra.message;
           }
-      }
       return res.json({ ...response, extra });
   }
 };
@@ -179,7 +228,7 @@ export const receivePayment = (req, res) => {
  * @param {*} req The request object from express
  * @param {*} ref The transaction id to be used
  */
-export const new_merchant = async (req, ref, meta,res) => {
+export const new_merchant = async (req, ref, meta, res) => {
   // check if this transaction has been settled before from our database
   let exists = await Transaction.findOne({
     ref
@@ -191,7 +240,7 @@ export const new_merchant = async (req, ref, meta,res) => {
   // now save a record of this transaction to the database and create the shop
   let transaction = new Transaction({
     name: "shop_opening_fee",
-    ref:ref,
+    ref: ref,
     used: true,
     remark: "Completed",
     amount: RATES.shop_opening_fee.amount,
@@ -233,7 +282,7 @@ export const new_merchant = async (req, ref, meta,res) => {
     shop.owner = user._id;
     shop.save();
   });
-  let response ={}
+  let response = {};
   response.message = "Transaction completed successfully";
   response.shop_id = shop._id;
   return res.json(response);
@@ -258,20 +307,22 @@ export const verifyTransaction = async (req, res) => {
         ) {
           return res.status(403).json({ error: "Illegal transaction" });
         }
-        return new_merchant(req, resp.body.data.tx.id, resp.body.data.tx,res);
+        return new_merchant(req, resp.body.data.tx.id, resp.body.data.tx, res);
       });
       break;
     case "3d-secure":
       // here we will check if the user's email is in the database as one of the pending transactions before registering the user
-      let transaction =
-        await Transaction.findOne({ ref: req.body.email, used: false })
-      .exec();
+      let transaction = await Transaction.findOne({
+        ref: req.body.email,
+        used: false
+      }).exec();
       if (transaction) {
-        let id = transaction.meta.id
-        let meta = transaction.meta
-        transaction.delete()
-        return new_merchant(req, id, meta,res);
-      } return res.status(403).json({ error: "bad transaction" });
+        let id = transaction.meta.id;
+        let meta = transaction.meta;
+        transaction.delete();
+        return new_merchant(req, id, meta, res);
+      }
+      return res.status(403).json({ error: "bad transaction" });
   }
 };
 

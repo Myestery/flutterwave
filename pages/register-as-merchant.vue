@@ -212,6 +212,10 @@ export default {
         .$post(`/api/users/promptPayment?type=${data.type}`, object)
         .then((res) => {
           console.log(res);
+          if(res.status=='card_error'){
+            this.card_has_error = true
+            this.card_error = res.message
+          }
           this.pay_status = res.status;
           this.otp_message = res.message;
           this.transaction_reference = res.hasOwnProperty(

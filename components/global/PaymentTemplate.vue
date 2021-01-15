@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card color="basil" v-if="status == null">
+    <v-card color="basil" v-if="status == null || card_has_error">
       <v-card-title class="text-center justify-center py-6">
         <h1 class="font-weight-bold display-2 basil--text">Payment Options</h1>
       </v-card-title>
@@ -127,7 +127,7 @@
       </v-row>
     </v-container>
     <v-row justify="center" v-if="status == 'needs_pin'">
-      <v-dialog v-model="dialog" persistent max-width="600px">
+      <v-dialog v-model="dialog1" persistent max-width="600px">
         <v-card>
           <v-card-title>
             <span class="headline">ATM PIN Required</span>
@@ -152,7 +152,7 @@
               text
               @click="
                 dialog = false;
-                PassData(types[tab],{suggested_auth:'PIN'});
+                PassData(types[tab], { suggested_auth: 'PIN' });
               "
             >
               COntinue
@@ -162,10 +162,10 @@
       </v-dialog>
     </v-row>
     <v-row justify="center" v-if="status == 'needs_otp'">
-      <v-dialog v-model="dialog" persistent max-width="600px">
+      <v-dialog v-model="dialog2" persistent max-width="600px">
         <v-card>
           <v-card-title>
-            <span class="headline">{{otp_message}}</span>
+            <span class="headline">{{ otp_message }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -204,12 +204,91 @@
     >
       Payment of {{ currency }}{{ amount_to_pay }} was successful
     </v-alert>
+    <v-row justify="center" v-if="status == 'needs_noauth_international'">
+      <v-dialog v-model="dialog3" persistent max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline"
+              >Billing Adress details needed for your mastercard</span
+            >
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row justify="center" xs6 md3>
+                <v-col class="col-12 col-md-4 col-sm-12">
+                  <v-text-field
+                    label="Billing Address"
+                    hint="Billing Address"
+                    persistent-hint
+                    v-model="extra.billingaddress"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col class="col-12 col-md-4 col-sm-12">
+                  <v-text-field
+                    label="Billing State"
+                    hint="Billing State"
+                    persistent-hint
+                    v-model="extra.billingstate"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col class="col-12 col-md-4 col-sm-12">
+                  <v-text-field
+                    label="Billing City"
+                    hint="Billing city"
+                    persistent-hint
+                    v-model="extra.billingcity"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row justify="center" xs6 md3>
+                <v-col class="col-12 col-md-4 col-sm-12">
+                  <v-text-field
+                    label="Billing Zip"
+                    hint="Billing Zip"
+                    persistent-hint
+                    v-model="extra.billingzip"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col class="col-12 col-md-4 col-sm-12">
+                  <v-text-field
+                    label="Billing Country"
+                    hint="Billing country"
+                    persistent-hint
+                    v-model="extra.billingcountry"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+            <small>*indicates required field</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="
+                dialog = false;
+                PassData(types[tab], {
+                  suggested_auth: 'NOAUTH_INTERNATIONAL',
+                });
+              "
+            >
+              COntinue
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
     <v-row v-if="status == 'needs_otp_frame'" justify="center">
       <v-container>
-      <iframe :src="url" style="height:400px; width:100%"></iframe>
-    </v-container>
+        <iframe :src="url" style="height: 400px; width: 100%"></iframe>
+      </v-container>
     </v-row>
-    
   </div>
 </template>
 <script>
@@ -221,12 +300,14 @@ export default {
     "url",
     "card_error",
     "card_has_error",
-    "otp_message"
+    "otp_message",
   ],
   data() {
     return {
       s_valid: false,
-      dialog: true,
+      dialog1: true,
+      dialog2:true,
+      dialog3:true,
       card_value: "5438898014560229",
       cardRules: [
         (v) =>
@@ -252,11 +333,16 @@ export default {
       extra: {
         otp: "",
         pin: "",
+        billingstate: "",
+        billingcountry: "",
+        billingzip: "",
+        billingaddress: "",
+        billingcity: "",
       },
     };
   },
   methods: {
-    PassData(card,more) {
+    PassData(card, more) {
       this.$emit("pass", {
         card: this.card_value,
         card_month: this.card_month,
@@ -264,14 +350,14 @@ export default {
         cvv: this.cvv,
         type: card,
         ...this.extra,
-        ...more
+        ...more,
       });
     },
-    Ready(){
-      this.$emit('finish',{
-        otp:this.extra.otp
-      })
-    }
+    Ready() {
+      this.$emit("finish", {
+        otp: this.extra.otp,
+      });
+    },
   },
 };
 </script>

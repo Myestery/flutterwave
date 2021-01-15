@@ -27,9 +27,9 @@
       </v-app-bar>
       <v-navigation-drawer
         v-model="drawer"
-        absolute
         dark
         temporary
+        fixed
         color="primary"
         background-color="primary"
       >

@@ -218,7 +218,7 @@
                     color="deep-purple accent-4"
                     dark
                     block
-                    to="/create-shop"
+                    to="/register-as-merchant"
                   >
                     Create a Retail account
                   </v-btn>
