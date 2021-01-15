@@ -48,7 +48,7 @@ export default {
    ** https://nuxtjs.org/guide/plugins
    */
   plugins: [
-    '~/plugins/flutterwave.js'
+    // '~/plugins/flutterwave.js'
   ],
   /*
    ** Auto import components
@@ -107,7 +107,9 @@ export default {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {
-    transpile:[   "flutterwave-vue-v3"]
+    transpile:[ 
+        // "flutterwave-vue-v3"
+      ]
   },
   serverMiddleware: ["~/api/index.js"],
   auth: {

@@ -149,6 +149,18 @@
 <script>
 export default {
   auth: "guest",
+  head() {
+    return {
+      script: [
+        {
+          src: "https://js.pusher.com/4.2/pusher.min.js",
+          async: true,
+          defer: true,
+        }
+      ],
+      title: "Register on jumga now",
+    };
+  },
   data: () => ({
     valid: false,
     e1: 1,
@@ -167,13 +179,13 @@ export default {
       (v) => /.+@.+/.test(v) || "E-mail must be valid",
     ],
     showPassword: false,
-    email: "",
-    password: "",
-    firstname: "",
-    surname: "",
+    email: "mail@meee.com",
+    password: "password",
+    firstname: "firstname",
+    surname: "surname",
     country: "",
-    confirmPassword: "",
-    account_number: "",
+    confirmPassword: "password",
+    account_number: "1023937732",
     banks: [],
     bank: "",
     pay_status: null,
@@ -183,30 +195,9 @@ export default {
     otp_url: "",
     otp_message: "",
     transaction_reference: "",
-    shop_name: "",
+    shop_name: "my cool shop",
   }),
   methods: {
-    register(data) {
-      this.$axios
-        .$post("/api/users/register-as-merchant", {
-          surname: this.surname,
-          firstname: this.firstname,
-          email: this.email,
-          password: this.password,
-          country: this.country.toLowerCase(),
-          bank: this.bank,
-          account_number: this.account_number,
-          shop_name: this.shop_name,
-          shop_description: "A new shop",
-        })
-        .then((res) => {
-          this.pay_status = res.status;
-          console.log(res);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
     promptPayment(data) {
       let object = {
         email: this.email,
@@ -228,21 +219,39 @@ export default {
           )
             ? res.transaction_reference
             : "";
+          this.otp_url = res.hasOwnProperty("otp_url") ? res.otp_url : "";
         })
         .catch((e) => {
           this.pay_status = null;
         });
     },
-    verifyTransaction(data) {
+    verifyTransaction(data,type='card') {
       this.$axios
         .$post("/api/users/verify-transaction", {
           transaction_reference: this.transaction_reference,
           otp: data.otp,
-          type: "card",
+          type,
+          surname: this.surname,
+          firstname: this.firstname,
+          email: this.email,
+          password: this.password,
+          country: this.country.toLowerCase(),
+          bank: this.bank,
+          account_number: this.account_number,
+          shop_name: this.shop_name,
+          shop_description: "A new shop",
         })
         .then((res) => {
-          //   this.pay_status = res.status;
-          console.log(res);
+          this.pay_status = res.status;
+          this.$auth.loginWith("local", {
+            data: {
+              email: this.email,
+              password: this.password,
+            },
+          });
+          setTimeout(() => {
+            this.$router.push("/shop"), 3000;
+          });
         })
         .catch((e) => {
           console.log(e);
@@ -257,6 +266,25 @@ export default {
       this.banks = banks.data.banks;
     },
   },
-  mounted() {},
+  mounted() {
+    // Enable pusher logging - don't include this in production
+    let Pusher = window.Pusher;
+    Pusher.logToConsole = true;
+
+    var pusher = new Pusher("b7ad8790c400535f2743", {
+      cluster: "eu",
+    });
+    var channel = pusher.subscribe("3d-secure");
+    channel
+      .bind("success", (data) => {
+        this.pay_status = "Charge Complete";
+        this.verifyTransaction({otp:true},"3d-secure")
+      })
+      .bind("error", (data) => {
+        this.pay_status = null;
+        this.card_has_error = true;
+        this.card_error = data.message;
+      });
+  },
 };
 </script>

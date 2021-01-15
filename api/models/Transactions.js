@@ -7,9 +7,9 @@ const Transactions = new Schema(
     ref: { type: String, required: true },
     used: { type: Boolean, required: true },
     remark: { type: String },
-    User: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    User: { type: Schema.Types.ObjectId, ref: "User"},
     amount: { type: Number, required: true },
-    meta: { type: Map, of: String }
+    meta: { type: Map}
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

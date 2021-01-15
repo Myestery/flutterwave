@@ -11,16 +11,13 @@ import {
   getBanks,
   verifyBank,
   tester,
-  registerAsMerchant,
   promptPayment,
-  verifyTransaction
+  verifyTransaction,
+  receivePayment
 } from "../controllers/usersController";
 
 //Register
 router.post("/users/register", register);
-
-//Register
-router.post("/users/register-as-merchant", registerAsMerchant);
 
 // Login
 router.post("/users/login", login);
@@ -42,6 +39,9 @@ router.get("/users/tester", tester)
 
 //Prompt payment and payment
 router.post("/users/promptPayment", promptPayment)
+
+//Receive payment
+router.get("/receivePayment", receivePayment)
 
 //Verify a transaction and save it to database
 router.post("/users/verify-transaction", verifyTransaction)

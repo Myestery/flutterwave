@@ -4,8 +4,11 @@
 </template>
 
 <script>
+    
+
 export default {
-  layout: "empty",
+  // layout: "empty",
+  auth:"guest",
   data(){
     return{
       key:'process.env.PRIVATE_KEY'
@@ -14,6 +17,13 @@ export default {
   head() {
     return {
       title: "About Page",
+      script: [
+        {
+          src: "https://cdn.jsdelivr.net/npm/vue/dist/vue.js",
+          async: true,
+          defer: true,
+        },
+      ],
     };
   },
 };

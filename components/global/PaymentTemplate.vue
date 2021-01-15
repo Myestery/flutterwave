@@ -204,9 +204,12 @@
     >
       Payment of {{ currency }}{{ amount_to_pay }} was successful
     </v-alert>
-    <v-container grid-list-xs v-if="status == 'needs_otp_frame'">
-      <iframe :src="url"></iframe>
+    <v-row v-if="status == 'needs_otp_frame'" justify="center">
+      <v-container>
+      <iframe :src="url" style="height:400px; width:100%"></iframe>
     </v-container>
+    </v-row>
+    
   </div>
 </template>
 <script>
@@ -224,7 +227,7 @@ export default {
     return {
       s_valid: false,
       dialog: true,
-      card_value: "5531886652142950",
+      card_value: "5438898014560229",
       cardRules: [
         (v) =>
           v.toString().length >= 16 || "The 16 digit pin in front of your card",
@@ -243,8 +246,8 @@ export default {
         year: 2020 + index,
         val: 20 + index,
       })),
-      card_month: "9",
-      card_year: "32",
+      card_month: "10",
+      card_year: "31",
       nameRules: [(v) => !!v || "This Field is required"],
       extra: {
         otp: "",

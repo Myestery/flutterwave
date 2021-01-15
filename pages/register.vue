@@ -59,24 +59,27 @@
                 class="input-group--focused"
                 @click:append="showPassword = !showPassword"
               ></v-text-field>
-                <v-select :items="countries" label="Select Country" 
-                @change="fetchBanks"
-                v-model="country"></v-select>
               <v-select
-                    :items="banks"
-                    label="Select Bank"
-                    item-text="name"
-                    v-model="bank"
-                    item-value="code"
-                    :rules="nameRules"
-                  ></v-select>
-                   <v-text-field
-                    name="account_number"
-                    label="Your account number"
-                    v-model="account_number"
-                    :rules="nameRules"
-                    type="number"
-                  ></v-text-field>
+                :items="countries"
+                label="Select Country"
+                @change="fetchBanks"
+                v-model="country"
+              ></v-select>
+              <v-select
+                :items="banks"
+                label="Select Bank"
+                item-text="name"
+                v-model="bank"
+                item-value="code"
+                :rules="nameRules"
+              ></v-select>
+              <v-text-field
+                name="account_number"
+                label="Your account number"
+                v-model="account_number"
+                :rules="nameRules"
+                type="number"
+              ></v-text-field>
             </v-container>
           </v-form>
         </v-list-item-content>
@@ -120,17 +123,12 @@ export default {
     password: "",
     firstname: "",
     surname: "",
-    country:"",
+    country: "",
     confirmPassword: "",
-    account_number:"",
-    banks:[],
-    bank:"",
-    countries:[
-      "Nigeria",
-      "Ghana",
-      "Kenya",
-      "UK"
-    ],
+    account_number: "",
+    banks: [],
+    bank: "",
+    countries: ["Nigeria", "Ghana", "Kenya", "UK"],
     emailRules: [
       (v) => !!v || "E-mail is required",
       (v) => /.+@.+/.test(v) || "E-mail must be valid",
@@ -144,7 +142,7 @@ export default {
           firstname: this.firstname,
           email: this.email,
           password: this.password,
-          country:this.country.toLowerCase()
+          country: this.country.toLowerCase(),
         })
         .then((res) => {
           this.$auth.loginWith("local", {
@@ -158,13 +156,14 @@ export default {
           console.log(e);
         });
     },
-    async fetchBanks(country){
-      let banks = await this.$axios.get("/api/users/getBanks",{
-      params: {
-        country: this.country
-      }})
-      this.banks = banks.data.banks
-    }
+    async fetchBanks(country) {
+      let banks = await this.$axios.get("/api/users/getBanks", {
+        params: {
+          country: this.country,
+        },
+      });
+      this.banks = banks.data.banks;
+    },
   },
   mounted() {},
 };
