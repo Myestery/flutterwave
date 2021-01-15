@@ -6,7 +6,7 @@
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" persistent max-width="600px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark v-bind="attrs" v-on="on">
+              <v-btn color="primary" dark v-bind="attrs" v-on="on" style="margin-top:20%">
                 Add Goods
               </v-btn>
             </template>
@@ -98,7 +98,7 @@
                     height="200px"
                     :src="`/img/home/${pro.image}`"
                   >
-                    <v-card-title>{{ pro.category }} </v-card-title>
+                    <v-card-title>{{ pro.name }} </v-card-title>
                     <v-expand-transition>
                       <div
                         v-if="hover"
@@ -116,7 +116,7 @@
                       <router-link
                         :to="`/product/${pro.id}`"
                         style="text-decoration: none"
-                        >{{ pro.name }}</router-link
+                        >{{ auth.user.shop.name }}</router-link
                       >
                     </div>
                     <div>${{ pro.price }}</div>
@@ -143,9 +143,6 @@
               type="card-avatar, actions"
             ></v-skeleton-loader>
           </div>
-          <div class="text-center mt-12">
-            <v-pagination v-model="page" :length="6"></v-pagination>
-          </div>
         </div>
       </div>
     </v-container>
@@ -162,7 +159,7 @@
                   <v-text-field
                     label="Name*"
                     required
-                    :value="active_pro.name"
+                    v-model="active_pro.name"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
@@ -227,7 +224,9 @@
 }
 </style>
 <script>
+import Vuex from 'vuex'
 export default {
+  middleware:["auth","shop-owner"],
   data: () => ({
     attrs: {
       class: "mb-6",
@@ -241,7 +240,6 @@ export default {
     page: 1,
     min: 0,
     max: 10000,
-    products: [],
     new_product: {},
     valid: false,
     loading: false,
@@ -249,14 +247,6 @@ export default {
     selected_index: 0,
     valid_edit: "",
   }),
-  mounted() {
-    this.$axios
-      .$get("/api/shop/goods")
-      .then((res) => {
-        this.products = res;
-      })
-      .catch((err) => console.log(err));
-  },
   methods: {
     Add() {
       this.dialog = false;
@@ -298,6 +288,15 @@ export default {
         })
         .catch((err) => console.error(err));
     },
+  },
+  async asyncData({isDev, route, store,$axios}) {
+    let products = await $axios.$get("/api/shop/goods")
+    return{
+      products
+    }
+  },
+  computed: {
+    ...Vuex.mapState(['auth'])
   },
 };
 </script>

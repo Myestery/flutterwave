@@ -14,6 +14,7 @@ export const GoodSchema = new Schema({
     },
     required: [true, "Goods category required"]
   },
-  image:{type:String}                                                                              
+  image: { type: String },
+  shipping_cost:{type:Number, required:true}
 });
 export default mongoose.model("Good", GoodSchema);

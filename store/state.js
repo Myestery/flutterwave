@@ -1,5 +1,4 @@
 export const state = () => ({
-  magic: true,
-  cart:[]
+  magic: true
 });
 export default state;

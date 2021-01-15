@@ -8,8 +8,8 @@ const jwt = require("jsonwebtoken");
 
 // Get all
 export const list = function(req, res, next) {
-  Good.find()
-    .populate("User", ["name", "email", "image"])
+  Good.find({_id: { $exists: true }})
+    .populate("Shop", ["name"])
     .exec(function(err, goods) {
       return err
         ? res.status(500).json({ message: "Error getting records." })
@@ -21,7 +21,7 @@ export const list = function(req, res, next) {
 export const show = function(req, res) {
   var id = req.params.id;
   Good.findOne({ _id: id })
-    .populate("User", ["name", "email", "image"])
+    .populate("Shop", ["name"])
     .exec((err, good) => {
       if (err) {
         return res.status(500).json({
@@ -78,7 +78,8 @@ export const create = [
     let good = new Good({
       name: req.body.name,
       price: req.body.price,
-      // Shop: user.Shop
+      // for simplicity, let default shipping cost for all goods be $10
+      shipping_cost:10,
       description: req.body.description,
       category: req.body.category,
       image: `deal${Math.ceil(Math.random(1,4)*4)}.jpg`,

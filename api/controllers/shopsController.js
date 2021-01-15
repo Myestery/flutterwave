@@ -60,6 +60,6 @@ export const goods = async (req, res) => {
     return res.status(404).json({"error":"User has no shop"})
   }
 
-  return res.json(shop.goods.map(good=>good.Good))
+  return res.json(shop.goods.map(good=>good.Good).filter(x=>x!=null))
   //get goods from shop
 }

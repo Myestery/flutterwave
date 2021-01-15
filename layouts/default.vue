@@ -18,11 +18,18 @@
           class="hidden-sm-and-down pl-10 ml-4"
         />
         <v-spacer />
-        <v-btn icon to="/shop"> 
+        <v-btn icon to="/shop">
           <v-icon>mdi-shopping</v-icon>
         </v-btn>
         <v-btn icon to="/cart">
-          <v-icon>mdi-cart</v-icon>
+          <v-badge
+            right
+            color="error"
+            :content="$store.state.cart.goods.length"
+            :value="$store.state.cart.goods.length"
+          >
+            <v-icon>mdi-cart</v-icon>
+          </v-badge>
         </v-btn>
       </v-app-bar>
       <v-navigation-drawer
@@ -86,12 +93,7 @@
       </v-navigation-drawer>
       <router-view />
       <v-footer :padless="true">
-        <v-card
-          flat
-          tile
-          width="100%"
-          class="primary white--text text-center"
-        >
+        <v-card flat tile width="100%" class="primary white--text text-center">
           <v-card-text>
             <v-btn class="mx-4 white--text" icon>
               <v-icon size="24px">mdi-home</v-icon>

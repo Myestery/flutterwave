@@ -389,11 +389,11 @@ export const logout = (req, res) => {
 };
 
 // Get User
-export const user = function(req, res) {
+export const user = function (req, res) {
   var token = req.headers.authorization;
   if (token) {
     // verifies secret and checks if the token is expired
-    jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function(
+    jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function (
       err,
       decoded
     ) {
@@ -409,7 +409,7 @@ export const user = function(req, res) {
           "shop"
         ])
           .populate("shop")
-          .exec(async function(err, user) {
+          .exec(async function (err, user) {
             if (err) {
               return res.status(500).json({
                 message: "Error logging in",
