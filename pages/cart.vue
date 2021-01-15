@@ -23,7 +23,7 @@
                   key="1"
                 >
                   <v-list-item-avatar>
-                    <v-img :src="'~../assets/img/shop/1.jpg'"></v-img>
+                    <v-img :src="'img/shop/1.jpg'"></v-img>
                   </v-list-item-avatar>
 
                   <v-list-item-content>
@@ -52,7 +52,7 @@
                   key="1"
                 >
                   <v-list-item-avatar>
-                    <v-img :src="'~../assets/img/shop/2.jpg'"></v-img>
+                    <v-img :src="'/img/shop/2.jpg'"></v-img>
                   </v-list-item-avatar>
 
                   <v-list-item-content>

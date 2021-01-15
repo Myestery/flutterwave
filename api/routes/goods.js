@@ -9,30 +9,22 @@ import {
   show,
   create,
   update,
-  remove,
-  addComment,
-  toggleLike
+  remove
 } from "../controllers/goodsController";
 
 // Get All
-router.get("/blogs", list);
+router.get("/goods", list);
 
 // Get One
-router.get("/blogs/:id", show);
+router.get("/goods/:id", show);
 
 // Create
-router.post("/blogs", config.isAuthenticated, create);
+router.post("/goods", config.isAuthenticated, create);
 
 // Update
-router.put("/blogs/:id", config.isAuthenticated, update);
+router.put("/goods/:id", config.isAuthenticated, update);
 
 // Delete
-router.delete("/blogs/:id", config.isAuthenticated, remove);
-
-// New Comment
-router.post("/blogs/:id/comment", config.isAuthenticated, addComment);
-
-// New Like
-router.post("/blogs/:id/like", config.isAuthenticated, toggleLike);
+router.delete("/goods/:id", config.isAuthenticated, remove);
 
 export default router;

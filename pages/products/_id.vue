@@ -4,13 +4,13 @@
       <div class="row">
         <div class="col-md-5 col-sm-5 col-xs-12">
           <v-carousel>
-            <v-carousel-item :src="require('../../assets/img/home/slider4.jpg')">
+            <v-carousel-item :src="'/img/home/slider4.jpg'">
             </v-carousel-item>
-            <v-carousel-item :src="require('../../assets/img/home/slider2.jpg')">
+            <v-carousel-item :src="'/img/home/slider2.jpg'">
             </v-carousel-item>
-            <v-carousel-item :src="require('../../assets/img/home/slider3.jpg')">
+            <v-carousel-item :src="'/img/home/slider3.jpg'">
             </v-carousel-item>
-            <v-carousel-item :src="require('../../assets/img/home/slider1.jpg')">
+            <v-carousel-item :src="'/img/home/slider1.jpg'">
             </v-carousel-item>
           </v-carousel>
         </div>
@@ -87,7 +87,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/home/deal1.jpg')"
+                      :src="'/img/home/deal1.jpg'"
                     >
                       <v-card-title>Bags & Purses </v-card-title>
                     </v-img>
@@ -111,7 +111,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/home/deal2.jpg')"
+                      :src="'/img/home/deal2.jpg'"
                     >
                       <v-card-title>T-Shirt </v-card-title>
                     </v-img>
@@ -135,7 +135,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/home/deal3.jpg')"
+                      :src="'/img/home/deal3.jpg'"
                     >
                       <v-card-title>Jeans </v-card-title>
                     </v-img>
@@ -159,7 +159,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/shop/5.jpg')"
+                      :src="'/img/shop/5.jpg'"
                     >
                       <v-card-title>Shirts </v-card-title>
                     </v-img>
@@ -183,7 +183,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/home/deal4.jpg')"
+                      :src="'/img/home/deal4.jpg'"
                     >
                       <v-card-title>Shoes </v-card-title>
                     </v-img>
@@ -207,7 +207,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../../assets/img/shop/3.jpg')"
+                      :src="'/img/shop/3.jpg'"
                     >
                       <v-card-title>Jackets </v-card-title>
                     </v-img>

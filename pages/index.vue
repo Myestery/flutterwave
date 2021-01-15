@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-carousel hide-delimiters>
-      <v-carousel-item :src="require('../assets/img/home/slider4.jpg')">
+      <v-carousel-item :src="'/img/home/slider4.jpg'">
         <v-row class="fill-height" align="center" justify="center">
           <div class="display-2 white--text pl-5 pr-5 hidden-sm-only">
             <strong>Get the best deals in the market</strong>
@@ -9,7 +9,7 @@
           <br />
         </v-row>
       </v-carousel-item>
-      <v-carousel-item :src="require('../assets/img/home/slider2.jpg')">
+      <v-carousel-item :src="'/img/home/slider2.jpg'">
         <v-row class="fill-height" align="center" justify="center">
           <div class="display-2 white--text pl-5 pr-5 hidden-sm-only">
             <strong>Upto 60% + Extra 10%</strong>
@@ -17,7 +17,7 @@
           <br />
         </v-row>
       </v-carousel-item>
-      <v-carousel-item :src="require('../assets/img/home/slider3.jpg')">
+      <v-carousel-item :src="'/img/home/slider3.jpg'">
         <v-row class="fill-height" align="center" justify="center">
           <div class="display-2 white--text pl-5 pr-5 hidden-sm-only">
             <strong>Upto 60% + Extra 10%</strong>
@@ -25,7 +25,7 @@
           <br />
         </v-row>
       </v-carousel-item>
-      <v-carousel-item :src="require('../assets/img/home/slider1.jpg')">
+      <v-carousel-item :src="'/img/home/slider1.jpg'">
         <v-row class="fill-height" align="center" justify="center">
           <div class="display-2 white--text pl-5 pr-5 hidden-sm-only">
             <strong>Upto 60% + Extra 10%</strong>
@@ -144,7 +144,7 @@
             <v-card class="mx-auto" flat min-width="40%">
               <v-avatar size="avatarSize" color="red" :rounded="true">
                 <img
-                  :src="require('assets/img/exciting_img-01.jpg')"
+                  :src="'/img/exciting_img-01.jpg'"
                   alt="alt"
                 />
               </v-avatar>
@@ -168,7 +168,7 @@
             <v-card class="mx-auto" flat min-width="40%">
               <v-avatar size="avatarSize" color="red" :rounded="true">
                 <img
-                  :src="require('assets/img/exciting_img-02.jpg')"
+                  :src="'/img/exciting_img-02.jpg'"
                   alt="alt"
                 />
               </v-avatar>
@@ -228,7 +228,7 @@
             <v-col md="4" class="col-12 col-md-4 col-sm-12">
               <v-card class="mx-auto" flat min-width="45%">
                 <v-img
-                  :src="require('../assets/img/supplier-pc-img.png')"
+                  :src="'/img/supplier-pc-img.png'"
                   sm6
                   alt="PC"
                 />
@@ -251,7 +251,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../assets/img/home/deal1.jpg')"
+                      :src="'/img/home/deal1.jpg'"
                     >
                       <v-card-title>Women Clothing </v-card-title>
                     </v-img>
@@ -275,7 +275,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../assets/img/home/deal2.jpg')"
+                      :src="'/img/home/deal2.jpg'"
                     >
                       <v-card-title>Men Clothing </v-card-title>
                     </v-img>
@@ -299,7 +299,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../assets/img/home/deal3.jpg')"
+                      :src="'/img/home/deal3.jpg'"
                     >
                       <v-card-title>Children Clothing </v-card-title>
                     </v-img>
@@ -323,7 +323,7 @@
                     <v-img
                       class="white--text align-end"
                       height="200px"
-                      :src="require('../assets/img/home/deal4.jpg')"
+                      :src="'/img/home/deal4.jpg'"
                     >
                       <v-card-title>Unisex </v-card-title>
                     </v-img>

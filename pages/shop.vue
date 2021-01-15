@@ -16,44 +16,56 @@
               </v-card-title>
               <v-card-text>
                 <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field label="Name*" required></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-select
-                        :items="['Men', 'Women', 'Children', 'Unisex']"
-                        label="Category*"
-                        required
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                        label="Price in Dollars*"
-                        required
-                        type="number"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-file-input
-                        label="Product Image"
-                        filled
-                        prepend-icon="mdi-camera"
-                      ></v-file-input>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Description*"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
+                  <v-form v-model="valid">
+                    <v-row>
+                      <v-col cols="12">
+                        <v-text-field
+                          label="Name*"
+                          required
+                          :rules="nameRules"
+                          v-model="new_product.name"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <v-select
+                          :items="[
+                            { name: 'Men', value: 'men' },
+                            { name: 'Women', value: 'women' },
+                            { name: 'Children', value: 'children' },
+                            { name: 'Unisex', value: 'unisex' },
+                          ]"
+                          item-text="name"
+                          item-value="value"
+                          label="Category*"
+                          :rules="nameRules"
+                          v-model="new_product.category"
+                          required
+                        ></v-select>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <v-text-field
+                          label="Price in Dollars*"
+                          required
+                          type="number"
+                          :rules="nameRules"
+                          v-model="new_product.price"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12">
+                        <v-text-field
+                          label="Description*"
+                          required
+                          :rules="nameRules"
+                          v-model="new_product.description"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row> </v-form
+                ></v-container>
                 <small>*indicates required field</small>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="dialog = false">
+                <v-btn color="primary" text @click="Add" :disabled="!valid">
                   SAVE
                 </v-btn>
                 <v-btn color="danger" text @click="dialog = false">
@@ -75,8 +87,8 @@
           <div class="row text-center">
             <div
               class="col-md-3 col-sm-6 col-xs-12"
-              :key="pro.id"
-              v-for="pro in products"
+              :key="pro._id"
+              v-for="(pro, index) in products"
             >
               <v-hover v-slot:default="{ hover }">
                 <v-card class="mx-auto" color="grey lighten-4" max-width="600">
@@ -84,9 +96,9 @@
                     class="white--text align-end"
                     :aspect-ratio="16 / 9"
                     height="200px"
-                    :src="pro.src"
+                    :src="`/img/home/${pro.image}`"
                   >
-                    <v-card-title>{{ pro.type }} </v-card-title>
+                    <v-card-title>{{ pro.category }} </v-card-title>
                     <v-expand-transition>
                       <div
                         v-if="hover"
@@ -101,19 +113,35 @@
                   </v-img>
                   <v-card-text class="text--primary">
                     <div>
-                      <router-link :to="`/product/${pro.id}`" style="text-decoration: none">{{
-                        pro.name
-                      }}</router-link>
+                      <router-link
+                        :to="`/product/${pro.id}`"
+                        style="text-decoration: none"
+                        >{{ pro.name }}</router-link
+                      >
                     </div>
                     <div>${{ pro.price }}</div>
                   </v-card-text>
                   <v-card-actions>
-                      <v-btn @click="edit_dialog = !edit_dialog; active_prod=pro">Edit</v-btn>
-                      <v-btn color="warning">delete</v-btn>
+                    <v-btn
+                      @click="
+                        edit_dialog = !edit_dialog;
+                        active_pro = { ...pro };
+                        selected_index = index;
+                      "
+                      >Edit</v-btn
+                    >
+                    <v-btn color="warning" @click="Delete(index)">delete</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-hover>
             </div>
+            <v-skeleton-loader
+              v-bind="attrs"
+              v-if="loading"
+              class="col-md-3 col-sm-6 col-xs-12"
+              :loading="true"
+              type="card-avatar, actions"
+            ></v-skeleton-loader>
           </div>
           <div class="text-center mt-12">
             <v-pagination v-model="page" :length="6"></v-pagination>
@@ -122,58 +150,70 @@
       </div>
     </v-container>
     <v-dialog v-model="edit_dialog" persistent max-width="600px">
-            <v-card>
-              <v-card-title>
-                <span class="headline">Product Details</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field label="Name*" required :value="active_pro.name"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-select
-                        :items="['Men', 'Women', 'Children', 'Unisex']"
-                        label="Category*"
-                        required
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                        label="Price in Dollars*"
-                        required
-                        type="number"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-file-input
-                        label="Product Image"
-                        filled
-                        prepend-icon="mdi-camera"
-                      ></v-file-input>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Description*"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-                <small>*indicates required field</small>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="edit_dialog = false">
-                  SAVE
-                </v-btn>
-                <v-btn color="danger" text @click="edit_dialog = false">
-                  cancel
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+      <v-card>
+        <v-card-title>
+          <span class="headline">Product Details</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-form v-model="valid_edit">
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Name*"
+                    required
+                    :value="active_pro.name"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select
+                    :items="[
+                      { name: 'Men', value: 'men' },
+                      { name: 'Women', value: 'women' },
+                      { name: 'Children', value: 'children' },
+                      { name: 'Unisex', value: 'unisex' },
+                    ]"
+                    item-text="name"
+                    item-value="value"
+                    label="Category*"
+                    :rules="nameRules"
+                    v-model="active_pro.category"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Price in Dollars*"
+                    required
+                    type="number"
+                    v-model="active_pro.price"
+                    :rules="nameRules"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Description*"
+                    :rules="nameRules"
+                    v-model="active_pro.description"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-container>
+          <small>*indicates required field</small>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="Edit" :disabled="!valid_edit">
+            SAVE
+          </v-btn>
+          <v-btn color="danger" text @click="edit_dialog = false">
+            cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <style>
@@ -189,111 +229,75 @@
 <script>
 export default {
   data: () => ({
+    attrs: {
+      class: "mb-6",
+      boilerplate: true,
+      elevation: 2,
+    },
     range: [0, 10000],
     dialog: false,
-    edit_dialog:false,
-    active_pro:{},
+    edit_dialog: false,
+    active_pro: {},
     page: 1,
-    breadcrums: [
-      {
-        text: "Home",
-        disabled: false,
-        href: "breadcrumbs_home",
-      },
-      {
-        text: "Products",
-        disabled: false,
-        href: "breadcrumbs_clothing",
-      },
-    ],
     min: 0,
     max: 10000,
-    products: [
-      {
-        id: 1,
-        name: "BLACK TEE",
-        type: "Jackets",
-        price: "18.00",
-        src: require("../assets/img/shop/1.jpg"),
-      },
-      {
-        id: 2,
-        name: "WHITE TEE",
-        type: "Polo",
-        price: "40.00",
-        src: require("../assets/img/shop/2.jpg"),
-      },
-      {
-        id: 3,
-        name: "Zara limited...",
-        type: "Denim",
-        price: "25.00",
-        src: require("../assets/img/shop/3.jpg"),
-      },
-      {
-        id: 4,
-        name: "SKULL TEE",
-        type: "Jackets",
-        price: "30.00",
-        src: require("../assets/img/shop/4.jpg"),
-      },
-      {
-        id: 5,
-        name: "MANGO WINTER",
-        type: "Sweaters",
-        price: "50.00",
-        src: require("../assets/img/shop/5.jpg"),
-      },
-      {
-        id: 6,
-        name: "SHIRT",
-        type: "Denim",
-        price: "34.00",
-        src: require("../assets/img/shop/6.jpg"),
-      },
-      {
-        id: 7,
-        name: "TRUCKER JACKET",
-        type: "Jackets",
-        price: "38.00",
-        src: require("../assets/img/shop/7.jpg"),
-      },
-      {
-        id: 8,
-        name: "COATS",
-        type: "Jackets",
-        price: "25.00",
-        src: require("../assets/img/shop/8.jpg"),
-      },
-      {
-        id: 9,
-        name: "MANGO WINTER",
-        type: "Sweaters",
-        price: "50.00",
-        src: require("../assets/img/shop/9.jpg"),
-      },
-      {
-        id: 10,
-        name: "SHIRT",
-        type: "Denim",
-        price: "34.00",
-        src: require("../assets/img/shop/10.jpg"),
-      },
-      {
-        id: 11,
-        name: "TRUCKER JACKET",
-        type: "Jackets",
-        price: "38.00",
-        src: require("../assets/img/shop/11.jpg"),
-      },
-      {
-        id: 12,
-        name: "COATS",
-        type: "Jackets",
-        price: "25.00",
-        src: require("../assets/img/shop/12.jpg"),
-      },
-    ],
+    products: [],
+    new_product: {},
+    valid: false,
+    loading: false,
+    nameRules: [(v) => !!v || "This Field is required"],
+    selected_index: 0,
+    valid_edit: "",
   }),
+  mounted() {
+    this.$axios
+      .$get("/api/shop/goods")
+      .then((res) => {
+        this.products = res;
+      })
+      .catch((err) => console.log(err));
+  },
+  methods: {
+    Add() {
+      this.dialog = false;
+      this.loading = true;
+      this.$axios
+        .$post("/api/goods", {
+          ...this.new_product,
+          shop_id: this.$auth.user.shop._id,
+        })
+        .then((data) => {
+          this.loading = false;
+          this.products = [
+            ...this.products,
+            {
+              ...this.new_product,
+              image: data.image,
+            },
+          ];
+          this.new_product = {};
+        })
+        .catch((err) => console.error(err));
+    },
+    Edit() {
+      this.edit_dialog = false;
+      this.$axios
+        .$put(`/api/goods/${this.active_pro._id}`, this.active_pro)
+        .then((data) => {
+          this.products = this.products.map((x, index) =>
+            index == this.selected_index ? { ...this.active_pro } : x
+          );
+        })
+        .catch((err) => console.error(err));
+    },
+    Delete(index) {
+      this.$axios
+        .$delete(`/api/goods/${this.products[index]._id}`)
+        .then((c) => {
+          this.products = this.products.filter((x, i) => index !== i);
+        })
+        .catch((err) => console.error(err));
+    },
+  },
 };
 </script>

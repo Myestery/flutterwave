@@ -1,6 +1,7 @@
 /*jshint -W014*/
 
 import Good from "../models/Good";
+import Shop from "../models/Shop";
 const validator = require("express-validator");
 const config = require("../config");
 const jwt = require("jsonwebtoken");
@@ -9,10 +10,10 @@ const jwt = require("jsonwebtoken");
 export const list = function(req, res, next) {
   Good.find()
     .populate("User", ["name", "email", "image"])
-    .exec(function(err, blogs) {
+    .exec(function(err, goods) {
       return err
         ? res.status(500).json({ message: "Error getting records." })
-        : res.json(blogs);
+        : res.json(goods);
     });
 };
 
@@ -21,36 +22,31 @@ export const show = function(req, res) {
   var id = req.params.id;
   Good.findOne({ _id: id })
     .populate("User", ["name", "email", "image"])
-    .populate({
-      path: "comments",
-      populate: {
-        path: "User",
-        model: "User",
-        select: ["name", "email", "image"]
-      }
-    })
-    .exec((err, blog) => {
+    .exec((err, good) => {
       if (err) {
         return res.status(500).json({
           message: "Error getting record."
         });
       }
-      if (!blog) {
+      if (!good) {
         return res.status(404).json({
           message: "No such record"
         });
       }
-      return res.json(blog);
+      return res.json(good);
     });
 };
 
 // Create
 export const create = [
   // validations rules
-  validator.body("title", "Please enter Good Title").isLength({ min: 1 }),
-  validator.body("body", "Please enter Article Content").isLength({ min: 1 }),
+  validator.body("name", "Please enter Good name").isLength({ min: 1 }),
+  validator.body("description", "Please enter Description").isLength({ min: 1 }),
+  validator.body("price", "Please enter Price for the product").isLength({ min: 1 }),
+  validator.body("category", "Please enter category").isLength({ min: 1 }),
+  validator.body("shop_id", "Please enter shop id").isLength({ min: 1 }),
 
-  function(req, res) {
+  async function(req, res) {
     // throw validation errors
     const errors = validator.validationResult(req);
     if (!errors.isEmpty()) {
@@ -73,24 +69,36 @@ export const create = [
     } else {
       return res.status(401).json({ message: "unauthorized" });
     }
+    //make sure the shop exists
+    let shop = await Shop.findById(req.body.shop_id).exec()
+    if (!shop) {
+      return res.status(422).json({"error":"Shop doesnt exist"})
+    }
     // initialize record
-    let blog = new Good({
-      title: req.body.title,
-      body: req.body.body,
-      User: user._id
+    let good = new Good({
+      name: req.body.name,
+      price: req.body.price,
+      // Shop: user.Shop
+      description: req.body.description,
+      category: req.body.category,
+      image: `deal${Math.ceil(Math.random(1,4)*4)}.jpg`,
+      Shop:shop._id
     });
 
     // save record
-    blog.save(function(err, blog) {
+    good.save(function(err, good) {
       if (err) {
         return res.status(500).json({
           message: "Error saving record",
           error: err
         });
       }
+      shop.goods = [...shop.goods, { Good: good._id }]
+      shop.save()
       return res.json({
         message: "saved",
-        _id: blog._id
+        _id: good._id,
+        image:good.image
       });
     });
   }
@@ -99,10 +107,6 @@ export const create = [
 // Update
 export const update = [
   // validation rules
-  validator.body("title", "Please enter Good Title").isLength({ min: 1 }),
-
-  validator.body("body", "Please enter Good Content").isLength({ min: 1 }),
-
   function(req, res) {
     // throw validation errors
     const errors = validator.validationResult(req);
@@ -111,37 +115,38 @@ export const update = [
     }
 
     let id = req.params.id;
-    Good.findOne({ _id: id }, function(err, blog) {
+    Good.findOne({ _id: id }, function(err, good) {
       if (err) {
         return res.status(500).json({
           message: "Error saving record",
           error: err
         });
       }
-      if (!blog) {
+      if (!good) {
         return res.status(404).json({
           message: "No such record"
         });
       }
 
       // initialize record
-      blog.title = req.body.title ? req.body.title : blog.title;
-      // blog.author =  req.body.author ? req.body.author : blog.author;
-      blog.body = req.body.body ? req.body.body : blog.body;
+      good.name = req.body.name ? req.body.name : good.name
+      good.description = req.body.description ? req.body.description : good.description
+      good.price = req.body.price ? req.body.price : good.price
+      good.category = req.body.category?req.body.category:good.category
 
       // save record
-      blog.save(function(err, blog) {
+      good.save(function(err, good) {
         if (err) {
           return res.status(500).json({
             message: "Error getting record."
           });
         }
-        if (!blog) {
+        if (!good) {
           return res.status(404).json({
             message: "No such record"
           });
         }
-        return res.json(blog);
+        return res.json(good);
       });
     });
   }
@@ -150,131 +155,12 @@ export const update = [
 // Delete
 export const remove = (req, res) => {
   let id = req.params.id;
-  Good.findByIdAndRemove(id, function(err, blog) {
+  Good.findByIdAndRemove(id, function(err, good) {
     if (err) {
       return res.status(500).json({
         message: "Error getting record."
       });
     }
-    return res.json(blog);
-  });
-};
-
-// Add Comment
-export const addComment = [
-  // validation rules
-  validator
-    .body("comment", "Please enter a valid comment")
-    .isLength({ min: 1 }),
-  (req, res) => {
-    // throw validation errors
-    const errors = validator.validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.mapped() });
-    }
-    var token = req.headers.authorization;
-    let user;
-    if (token) {
-      // verifies secret and checks if the token is expired
-      jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function(
-        err,
-        decoded
-      ) {
-        if (err) {
-          return res.status(401).json({ message: "unauthorized" });
-        } else {
-          user = decoded;
-        }
-      });
-    } else {
-      return res.status(401).json({ message: "unauthorized" });
-    }
-    let id = req.params.id;
-    Good.findOne({ _id: id }, function(err, blog) {
-      if (err) {
-        return res.status(500).json({
-          message: "Error saving record",
-          error: err
-        });
-      }
-      if (!blog) {
-        return res.status(404).json({
-          message: "No such record"
-        });
-      }
-      // Add the comment
-      blog.comments.push({ comment: req.body.comment, User: user._id });
-
-      // save record
-      blog.save(function(err, blog) {
-        if (err) {
-          return res.status(500).json({
-            message: "Error getting record."
-          });
-        }
-        if (!blog) {
-          return res.status(404).json({
-            message: "No such record"
-          });
-        }
-        return show(req, res);
-      });
-    });
-  }
-];
-
-// Add Like
-export const toggleLike = (req, res) => {
-  var token = req.headers.authorization;
-  let user;
-  if (token) {
-    // verifies secret and checks if the token is expired
-    jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function(
-      err,
-      decoded
-    ) {
-      if (err) {
-        return res.status(401).json({ message: "unauthorized" });
-      } else {
-        user = decoded;
-      }
-    });
-  } else {
-    return res.status(401).json({ message: "unauthorized" });
-  }
-  let id = req.params.id;
-  Good.findOne({ _id: id }, function(err, blog) {
-    if (err) {
-      return res.status(500).json({
-        message: "Error saving record",
-        error: err
-      });
-    }
-    if (!blog) {
-      return res.status(404).json({
-        message: "No such record"
-      });
-    }
-    // Perform the like or unlike function
-    let otherLikes = blog.likes.filter(x => x.User != user._id);
-    blog.likes =
-      otherLikes.length == blog.likes.length
-        ? [...otherLikes, { User: user._id }]
-        : otherLikes;
-    
-    // save record
-    blog.save(function(err, blog) {
-      if (err) {
-        return res.status(500).json({
-          message: err
-        });
-      }
-      if (!blog) {
-        return res.status(404).json({
-          message: "No such record"
-        });
-      }
-      return show(req, res);
-    });
+    return res.json({success:"deleted"});
   });
 };

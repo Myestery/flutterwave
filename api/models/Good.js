@@ -13,6 +13,7 @@ export const GoodSchema = new Schema({
       message: props => `${props.value} is not a valid category!`
     },
     required: [true, "Goods category required"]
-  }
+  },
+  image:{type:String}                                                                              
 });
 export default mongoose.model("Good", GoodSchema);

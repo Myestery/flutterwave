@@ -90,7 +90,7 @@
           flat
           tile
           width="100%"
-          class="secondary white--text text-center"
+          class="primary white--text text-center"
         >
           <v-card-text>
             <v-btn class="mx-4 white--text" icon>
