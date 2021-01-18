@@ -211,6 +211,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+       <v-dialog v-model="new_shop" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Welcome Home</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            Here you can addgoods and sell them at your will
+          </v-container>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <style>
@@ -246,6 +258,7 @@ export default {
     nameRules: [(v) => !!v || "This Field is required"],
     selected_index: 0,
     valid_edit: "",
+    new_shop:false
   }),
   methods: {
     Add() {
@@ -297,6 +310,11 @@ export default {
   },
   computed: {
     ...Vuex.mapState(['auth'])
+  },
+  mounted() {
+    if(this.$route.query.hasOwnProperty('new')){
+      this.new_shop = true
+    }
   },
 };
 </script>

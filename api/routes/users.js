@@ -11,14 +11,16 @@ import {
   getBanks,
   verifyBank,
   tester,
-  promptPayment,
-  verifyTransaction,
-  receivePayment
+  new_merchant,
+  checkMail,
+  seedDatabase
 } from "../controllers/usersController";
 
 //Register
 router.post("/users/register", register);
 
+//Seed
+router.post("/seedDatabase",seedDatabase)
 // Login
 router.post("/users/login", login);
 
@@ -37,12 +39,8 @@ router.post("/users/verify-bank-details",verifyBank)
 //tester
 router.get("/users/tester", tester)
 
-//Prompt payment and payment
-router.post("/users/promptPayment", promptPayment)
-
 //Receive payment
-router.get("/receivePayment", receivePayment)
+router.post("/users/register-as-merchant", new_merchant)
 
-//Verify a transaction and save it to database
-router.post("/users/verify-transaction", verifyTransaction)
+router.post("/users/check-email",checkMail)
 export default router;

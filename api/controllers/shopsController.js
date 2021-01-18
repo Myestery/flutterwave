@@ -63,3 +63,22 @@ export const goods = async (req, res) => {
   return res.json(shop.goods.map(good=>good.Good).filter(x=>x!=null))
   //get goods from shop
 }
+
+export const resolve = async (req,res)=>{
+  const callVerify =  async (ref) => {
+
+    const payload = {
+        txref:ref
+    }
+    try {
+       const response =  await rave.VerifyTransaction.verify(payload)
+      console.log(response);
+      return res.json({response})
+    } catch (error) {
+        console.log(error)
+    }                            
+   
+}
+
+callVerify("JUMGA-1610611807168");
+}

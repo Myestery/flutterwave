@@ -262,7 +262,7 @@
                     </v-card-text>
 
                     <div class="text-center">
-                      <v-btn to="/products/categories/women" class="ma-2" outlined color="info">
+                      <v-btn to="/products?category=women" class="ma-2" outlined color="info">
                         Explore
                       </v-btn>
                     </div>
@@ -286,7 +286,7 @@
                     </v-card-text>
 
                     <div class="text-center">
-                      <v-btn to="/products/categories/men" class="ma-2" outlined color="info">
+                      <v-btn to="/products?category=men" class="ma-2" outlined color="info">
                         Explore
                       </v-btn>
                     </div>
@@ -310,7 +310,7 @@
                     </v-card-text>
 
                     <div class="text-center">
-                      <v-btn to="/products/categories/children" class="ma-2" outlined color="info">
+                      <v-btn to="/products?category=children" class="ma-2" outlined color="info">
                         Explore
                       </v-btn>
                     </div>
@@ -334,7 +334,7 @@
                     </v-card-text>
 
                     <div class="text-center">
-                      <v-btn to="/products/categories/unisex" class="ma-2" outlined color="info">
+                      <v-btn to="/products?category=unisex" class="ma-2" outlined color="info">
                         Explore
                       </v-btn>
                     </div>

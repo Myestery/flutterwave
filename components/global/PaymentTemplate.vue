@@ -2,7 +2,7 @@
   <div>
     <v-card color="basil" v-if="status == null || card_has_error">
       <v-card-title class="text-center justify-center py-6">
-        <h1 class="font-weight-bold display-2 basil--text">Payment Options</h1>
+        <span class="font-weight-bold display-1 basil--text">Payment Options</span>
       </v-card-title>
 
       <v-tabs v-model="tab" grow>
@@ -95,12 +95,11 @@
                     ></v-select>
                   </v-col>
                 </v-row>
-                <v-card-actions>
+                <v-card-actions justify-center>
                   <v-btn
-                    color="info"
-                    justify-center
-                    block
+                    color="info"                    
                     :disabled="!s_valid"
+                    style="margin-left:33%;width:33%"
                     @click="PassData(types[tab])"
                     >Pay Now</v-btn
                   >

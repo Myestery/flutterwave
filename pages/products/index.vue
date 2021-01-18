@@ -54,7 +54,7 @@
                         class="d-flex transition-fast-in-fast-out white darken-2 v-card--reveal display-3 white--text"
                         style="height: 100%"
                       >
-                        <v-btn v-if="hover" href="/product" class="" outlined
+                        <v-btn v-if="hover" :to="`/products/${pro._id}`" class="" outlined
                           >VIEW</v-btn
                         >
                       </div>
@@ -62,9 +62,9 @@
                   </v-img>
                   <v-card-text class="text--primary">
                     <div>
-                      <a href="/product" style="text-decoration: none">{{
+                      <nuxt-link :to="`/products/${pro._id}`" style="text-decoration: none">{{
                         pro.Shop.name
-                      }}</a>
+                      }}</nuxt-link>
                     </div>
                     <div>${{ pro.price }}</div>
                   </v-card-text>
@@ -136,13 +136,16 @@ export default {
       if (category == null) return "All Products";
       return `${this.category} products only`;
     },
-    // ...mapState([
-    //   'staging'
-    // ])
   },
   methods: {
     Buy(product){
       this.$store.dispatch('cart/ADD_OR_REMOVE',product)
+      this.$forceUpdate()
+    }
+  },
+  mounted() {
+    if(this.$route.query.hasOwnProperty('category') && this.$route.query.category){
+      this.category=this.$route.query.category
     }
   },
 };

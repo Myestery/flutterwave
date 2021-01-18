@@ -98,32 +98,31 @@
 <script>
 import { mapState } from "vuex";
 export default {
-  data: () => ({}),
+  auth: false,
   computed: {
     ...mapState(["cart"]),
     total() {
-      return this.cart.goods.length?
-        this.cart.goods.map((x) => x.price * x.qty)
-        .reduce((x, y) => x + y):0
+      return this.cart.goods.length
+        ? this.cart.goods.map(x => x.price * x.qty).reduce((x, y) => x + y)
+        : 0;
     },
     shipping_cost() {
-      return this.cart.goods.length?
-        this.cart.goods.map((x) => x.shipping_cost)
-        .reduce((x, y) => x + y):0
-    },
+      return this.cart.goods.length
+        ? this.cart.goods.map(x => x.shipping_cost).reduce((x, y) => x + y)
+        : 0;
+    }
   },
   mounted() {
-    this.cart.goods = this.cart.goods.map((good) => ({
+    this.cart.goods = this.cart.goods.map(good => ({
       ...good,
       qty: 1,
-      total: good.price,
+      total: good.price
     }));
   },
   methods: {
-    Remove(prod){
-      this.$store.dispatch('cart/ADD_OR_REMOVE',prod)
+    Remove(prod) {
+      this.$store.dispatch("cart/ADD_OR_REMOVE", prod);
     }
-  },
+  }
 };
 </script>
-

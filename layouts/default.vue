@@ -19,6 +19,9 @@
         />
         <v-spacer />
         <v-btn icon to="/shop">
+          <v-icon>mdi-home-city</v-icon>
+        </v-btn>
+        <v-btn icon to="/products">
           <v-icon>mdi-shopping</v-icon>
         </v-btn>
         <v-btn icon to="/cart">
@@ -58,13 +61,13 @@
               <v-list-item-title
                 ><v-list-item-icon>
                   <v-icon>mdi-shopping</v-icon> </v-list-item-icon
-                >Products</v-list-item-title
+                >MarketPlace</v-list-item-title
               >
             </v-list-item>
             <v-list-item to="/shop" v-if="auth.loggedIn">
               <v-list-item-title
                 ><v-list-item-icon>
-                  <v-icon>mdi-account-details</v-icon> </v-list-item-icon
+                  <v-icon>mdi-home-city</v-icon> </v-list-item-icon
                 >Shop</v-list-item-title
               >
             </v-list-item>

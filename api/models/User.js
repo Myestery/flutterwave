@@ -7,6 +7,7 @@ export const UserSchema = new Schema({
     of: String,
     required: true
   },
+  phone_number:{type:String},
   email: { type: String, required: true, index: { unique: true } },
   password: { type: String, required: true },
   image: { type: String },
@@ -25,11 +26,7 @@ export const UserSchema = new Schema({
     ]
   },
   country: {
-    type: String,
-    validate: {
-      validator: v => ["nigeria", "ghana", "kenya", "uk"].includes(v),
-      message: props => `Sorry, we don't operate in ${props.value} for now!`
-    }
+    type:String,
   },
   account: {
     type: Map,

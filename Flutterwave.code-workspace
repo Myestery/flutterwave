@@ -11,6 +11,6 @@
 		"workspace.isHidden": false,
 		"git.ignoreLimitWarning": true,
 		"files.autoSave": "afterDelay",
-		"files.autoSaveDelay": 6000
+		"files.autoSaveDelay": 10000
 	}
 }

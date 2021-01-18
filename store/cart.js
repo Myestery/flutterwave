@@ -1,7 +1,8 @@
 /*jshint -W014 */
 export const state = () => ({
   goods: [],
-  staging: {}
+  staging: {},
+  country:"NG"
 });
 
 export const actions = {
@@ -22,6 +23,9 @@ export const mutations = {
         state.goods = state.goods.filter(good => good._id != product._id)
         state.staging[product._id] = false;
     }
+  },
+  SET_COUNTRY(state, country) {
+    state.country = country
   }
 };
 export const getters = {

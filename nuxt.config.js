@@ -31,7 +31,7 @@ export default {
       }
     ],
     link: [
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/svg", href: "/img/logo1.svg" },
       { rel: "stylesheet", href: "/css/material.css", type: "text/css" },
       { rel: "stylesheet", href: "/css/material-icon.css", type: "text/css" }
     ]
@@ -48,7 +48,7 @@ export default {
    ** https://nuxtjs.org/guide/plugins
    */
   plugins: [
-    // '~/plugins/flutterwave.js'
+    '~/plugins/flutterwave.js'
   ],
   /*
    ** Auto import components
@@ -108,7 +108,7 @@ export default {
    */
   build: {
     transpile:[ 
-        // "flutterwave-vue-v3"
+        "flutterwave-vue-v3"
       ]
   },
   serverMiddleware: ["~/api/index.js"],
