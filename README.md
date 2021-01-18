@@ -16,7 +16,7 @@ Ui template by
 Flutterwave node express sdk
 Flutterwave vue v3 helper
 
-#Getting started
+# Getting started
 A seller can signup via the link /register-as-merchant. 
 Immediately his payment is processed,it sends
 a copy of the data from the transaction to the seller
