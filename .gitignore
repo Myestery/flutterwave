@@ -89,5 +89,4 @@ sw.*
 # Vim swap files
 *.swp
 
-# My profile pictures
-static/img 
+
