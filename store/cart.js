@@ -8,6 +8,9 @@ export const state = () => ({
 export const actions = {
   ADD_OR_REMOVE({ commit }, product) {
     commit("ADD_OR_REMOVE", product);
+  },
+  EMPTY({ commit }) {
+    commit("EMPTY")
   }
 };
 /*jshint -W018*/
@@ -26,6 +29,9 @@ export const mutations = {
   },
   SET_COUNTRY(state, country) {
     state.country = country
+  },
+  EMPTY(state) {
+    state.goods = []
   }
 };
 export const getters = {

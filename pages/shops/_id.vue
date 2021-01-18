@@ -69,7 +69,7 @@
                     <div>${{ pro.price }}</div>
                   </v-card-text>
                   <v-card-actions>
-                    <v-btn color="primary" block :to="`/shops/${pro.Shop._id}`">Visit Store</v-btn>
+                    <v-btn color="primary" block @click="Buy(pro)">ADD TO ORDER</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-hover>
@@ -94,10 +94,11 @@
 import {mapState} from 'vuex'
 export default {
   auth: false,
-  async asyncData({ $axios }) {
-    let products = await $axios.$get("/api/goods");
+  async asyncData({ $axios,params}) {
+    let shop = await $axios.$get(`/api/shops/${params.id}`);
     return {
-      products,
+      products:shop.shop.goods.map(x=>x.Good).filter(x=>x!==null),
+      shop:shop.shop
     };
   },
   data: () => ({
@@ -109,9 +110,9 @@ export default {
         to: "/",
       },
       {
-        text: "Products",
+        text: "Shops",
         disabled: false,
-        to: "/products",
+        to: "/shops",
       },
     ],
     items: [
@@ -122,6 +123,9 @@ export default {
       { id: 8, value: "Unisex", text: "Unisex" },
     ],
     category: null,
+    orders:[
+
+    ]
   }),
   computed: {
     products_categorized() {
@@ -130,6 +134,7 @@ export default {
       return this.products
         ? this.products.filter((x) => x.category == category.toLowerCase())
         : [];
+      // return []
     },
     category_text() {
       let category = this.category;
@@ -148,5 +153,10 @@ export default {
       this.category=this.$route.query.category
     }
   },
+  head(){
+    return{
+      title: `${this.shop.name}'s Shop`
+    }
+  }
 };
 </script>

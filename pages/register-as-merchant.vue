@@ -281,7 +281,7 @@ export default {
             },
           });
           setTimeout(() => {
-            this.$router.push("/shop?new=true"), 3000;
+            window.location.href = ("/shop?new=true"), 3000;
           });
           console.log(res);
         })
@@ -322,6 +322,7 @@ export default {
           this.error_text = "Email ALready exists";
         }
       } catch (error) {
+        console.log(error)
         this.loading = false;
         this.show_error = true;
         this.error_text = "Error validating email";

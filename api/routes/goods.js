@@ -27,4 +27,7 @@ router.put("/goods/:id", config.isAuthenticated, update);
 // Delete
 router.delete("/goods/:id", config.isAuthenticated, remove);
 
+// Buy some goods from cart
+router.delete("/goods/buy", config.isAuthenticated, remove);
+
 export default router;

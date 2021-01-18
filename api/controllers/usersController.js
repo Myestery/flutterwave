@@ -109,6 +109,7 @@ export const new_merchant = [
     }
     // next step is to verify that this transaction was successful with flutterwave api
     try {
+      let subaccount_id
       const response = await rave.VerifyTransaction.verify({
         txref: req.body.data.tx_ref
       });
@@ -128,8 +129,14 @@ export const new_merchant = [
           amount: RATES.shop_opening_fee.amount,
           meta: req.body.data
         });
+        // these are the seeded dispatch riders, so we assign a random one
         let rider = await User.findOne({
-          email: "polymenjohn1@gmail.com"
+          email: [
+            "Ade@gmail.com",
+            "Olu@gmail.com",
+            "musa@gmail.com",
+            "gbenga@gmail.com"
+          ][Math.round(Math.random(1, 4) * 4)]
         }).exec();
         let shop = new Shop({
           name: req.body.shop_name,
@@ -139,6 +146,27 @@ export const new_merchant = [
           active: true
         });
 
+        // now we will create a subaccount for the user that we'll use to pay him
+        const payload = {
+          "account_bank": req.body.bank,
+          "account_number": req.body.account_number,
+          "business_name": req.body.shop_name,
+          "business_email": req.body.email,
+          "business_contact": `${req.body.surname} ${req.body.firstname}`,
+          "business_contact_mobile": req.body.phone_number,
+          "business_mobile": req.body.phone_number,
+          "country": req.body.country,
+          "split_type": "percentage",
+          "split_value": RATES.Sales.JumgaCommision * 100
+      }
+      try {
+         const resp =  await rave.Subaccount.create(payload)
+        console.log(resp);
+        subaccount_id = resp.data.subaccount_id
+      } catch (error) {
+          console.log(error)
+        }        
+        
         //create the user's account
         let user = new User({
           name: {
@@ -152,7 +180,8 @@ export const new_merchant = [
           country: req.body.country,
           account: {
             account_number: req.body.account_number,
-            bank: req.body.bank
+            bank: req.body.bank,
+            subaccount_id
           }
         });
         var salt = bcrypt.genSaltSync(10);
@@ -162,6 +191,7 @@ export const new_merchant = [
           transaction.User = user._id;
           transaction.save();
           shop.owner = user._id;
+          shop.subaccount_id = subaccount_id
           shop.save();
           user.shop = shop._id;
           user.save();
@@ -258,7 +288,8 @@ export const user = function(req, res) {
           "email",
           "image",
           "roles",
-          "shop"
+          "shop",
+          "phone_number"
         ])
           .populate("shop")
           .exec(async function(err, user) {
@@ -349,10 +380,16 @@ export const checkMail = [
   body("email", "Please enter an Email").isLength({ min: 1 }),
   async (req, res) => {
     let exists = await User.findOne({ email: req.body.email }).exec();
-    if (exists == null) {
-      return res.json({ success: "Good to go", status: true });
-    }
+    let account_exist = await User.findOne({ 'account.bank':"044"}).exec();
+    if (exists !== null) {
+      console.log("email in use");
     return res.status(422).json({ error: "sorry, email already exists" });
+    }
+    if (account_exist !== null) {
+      console.log("email in use");
+      return res.status(422).json({ error: "sorry, account number already exists" });
+    }
+      return res.json({ success: "Good to go", status: true });
   }
 ];
 
@@ -362,33 +399,37 @@ export const seedDatabase = async (req, res) => {
       firstname: "Ade",
       surname: "ola",
       country: "NG",
-      email:"Ade@gmail.com",
+      email: "Ade@gmail.com",
       account_number: "0690000031",
-      bank: "044"
+      bank: "044",
+      subaccount_id:"RS_46A212FC6CCF28C6BF44A7FE040633B0"
     },
     {
       surname: "Olu",
       firstname: "Mide",
-      email:"Olu@gmail.com",
+      email: "Olu@gmail.com",
       country: "NG",
       account_number: "0690000032",
-      bank: "044"
+      bank: "044",
+      subaccount_id:"RS_B832B81A843554C410E418EAF54C2242"
     },
     {
       surname: "Musa",
       firstname: "Shekau",
-      email:"musa@gmail.com",
+      email: "musa@gmail.com",
       country: "NG",
       account_number: "0690000033",
-      bank: "044"
+      bank: "044",
+      subaccount_id:"RS_6E9D1CD2FAD0F9FD93FAB635206EB7A0"
     },
     {
       firstname: "Fatai",
       surname: "gbenga",
-      email:"gbenga@gmail.com",
+      email: "gbenga@gmail.com",
       country: "NG",
       account_number: "0690000034",
-      bank: "044"
+      bank: "044",
+      subaccount_id:"RS_32EABB82950364E85AD5D7029DB46427"
     }
   ];
   for (let x = 0; x < riders.length; x++) {
@@ -402,14 +443,15 @@ export const seedDatabase = async (req, res) => {
       email: riders[x].email,
       phone_number: "010239365",
       password: bcrypt.hashSync("password", salt),
-      roles: [{ role: "dispatch_rider" }, { role: "buyer" }],
+      roles: [{ role: "rider" }, { role: "buyer" }],
       country: riders[x].country,
       account: {
         account_number: riders[x].account_number,
-        bank: riders[x].bank
+        bank: riders[x].bank,
+        subaccount_id:riders[x].subaccount_id
       }
     });
     user.save();
   }
-  return res.json({message:"database seeded successfully"})
+  return res.json({ message: "database seeded successfully" });
 };

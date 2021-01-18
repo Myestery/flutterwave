@@ -86,9 +86,48 @@
             </template>
           </v-simple-table>
           <div class="text-center">
-            <v-btn to="/checkout" class="primary white--text mt-5" outlined
-              >PROCEED TO PAY</v-btn
+            <v-dialog v-model="show_success" max-width="600px">
+              <v-card>
+                <v-card-title>
+                  <span class="headline">Congratulations</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                    Your Order has been placed, go to home page to see all
+                    orders
+                  </v-container>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
+            <flutterwave-pay-button
+              v-once
+              v-if="!show_success"
+              style="margin-top: 10%"
+              :tx_ref="generateReference()"
+              :amount="total + shipping_cost"
+              currency="USD"
+              payment_options="card, mobilemoneyghana, mpesa, ussd"
+              :customer="{
+                name: `${$store.state.auth.user.name.firstname} ${$store.state.auth.user.name.surname}`,
+                email: $store.state.auth.user.email,
+                phone_number: $store.state.auth.user.phone_number,
+              }"
+              :customizations="{
+                title: 'Checkout goods for order',
+                description: 'Pay for the goods you requested for',
+                logo: image_link,
+              }"
+              :callback="Pay"
+              :onclose="closedPaymentModal"
+              :meta="{ goods: goods_ids }"
             >
+              <v-btn
+                class="primary white--text mt- 5"
+                outlined
+                v-if="cart.goods.length"
+                >PROCEED TO PAY</v-btn
+              >
+            </flutterwave-pay-button>
           </div>
         </v-col>
       </v-row>
@@ -98,31 +137,62 @@
 <script>
 import { mapState } from "vuex";
 export default {
-  auth: false,
   computed: {
     ...mapState(["cart"]),
     total() {
       return this.cart.goods.length
-        ? this.cart.goods.map(x => x.price * x.qty).reduce((x, y) => x + y)
+        ? this.cart.goods.map((x) => x.price * x.qty).reduce((x, y) => x + y)
         : 0;
     },
     shipping_cost() {
       return this.cart.goods.length
-        ? this.cart.goods.map(x => x.shipping_cost).reduce((x, y) => x + y)
+        ? this.cart.goods.map((x) => x.shipping_cost).reduce((x, y) => x + y)
         : 0;
-    }
+    },
   },
   mounted() {
-    this.cart.goods = this.cart.goods.map(good => ({
+    this.cart.goods = this.cart.goods.map((good) => ({
       ...good,
       qty: 1,
-      total: good.price
+      total: good.price,
     }));
+    this.image_link = `${window.location.origin}/img/logo1.svg`;
+    this.goods_ids = this.cart.goods.length
+      ? this.cart.goods.map((good) => good._id).reduce((x, y) => `${x},${y}`)
+      : "";
+  },
+  data() {
+    return {
+      image_link: "",
+      goods_ids: "",
+      show_success: false,
+      show_error: false,
+    };
   },
   methods: {
     Remove(prod) {
       this.$store.dispatch("cart/ADD_OR_REMOVE", prod);
-    }
-  }
+    },
+    async Pay(receipt) {
+      try {
+        let response = await this.$axios.$post("/api/goods/buy", {
+          goods: this.cart.goods,
+          receipt,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      this.$store.dispatch("cart/EMPTY");
+      this.show_success = true;
+    },
+
+    closedPaymentModal() {
+      console.log("payment is closed");
+    },
+    generateReference() {
+      let date = new Date();
+      return date.getTime().toString();
+    },
+  },
 };
 </script>

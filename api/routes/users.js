@@ -10,7 +10,6 @@ import {
   user,
   getBanks,
   verifyBank,
-  tester,
   new_merchant,
   checkMail,
   seedDatabase
@@ -37,7 +36,7 @@ router.get("/users/getBanks",getBanks)
 router.post("/users/verify-bank-details",verifyBank)
 
 //tester
-router.get("/users/tester", tester)
+// router.get("/users/tester", test)
 
 //Receive payment
 router.post("/users/register-as-merchant", new_merchant)

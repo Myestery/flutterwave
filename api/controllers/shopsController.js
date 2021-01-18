@@ -82,3 +82,16 @@ export const resolve = async (req,res)=>{
 
 callVerify("JUMGA-1610611807168");
 }
+
+export const shop = async (req, res) => {
+  let shop_id = req.params.id
+  let shop = await Shop.findOne({ _id: shop_id })
+    .populate({
+      path: "owner",
+    })
+    .populate({
+      path: 'goods',
+      populate:"Good"
+    }).exec()
+  return res.json({shop})
+}

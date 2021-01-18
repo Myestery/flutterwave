@@ -74,7 +74,7 @@
                 </div>
               </v-card-text>
               <v-card-actions>
-                <v-btn text color="deep-purple accent-4" to="/products">
+                <v-btn text color="deep-purple accent-4" to="/shops">
                   Learn More
                 </v-btn>
               </v-card-actions>
@@ -98,7 +98,7 @@
                 </div>
               </v-card-text>
               <v-card-actions>
-                <v-btn text color="deep-purple accent-4" to="/dispatch-riders">
+                <v-btn text color="deep-purple accent-4" to="/products">
                   Learn More
                 </v-btn>
               </v-card-actions>
@@ -121,7 +121,7 @@
                 </div>
               </v-card-text>
               <v-card-actions>
-                <v-btn text color="deep-purple accent-4" to="/signup">
+                <v-btn text color="deep-purple accent-4" to="/register-as-merchant">
                   Learn More
                 </v-btn>
               </v-card-actions>

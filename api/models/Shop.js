@@ -12,7 +12,8 @@ const Shop = new Schema(
       })
     ],
     rider: { type: Schema.Types.ObjectId, ref: "User"},
-    active:{type:Boolean,required:true}
+    active: { type: Boolean, required: true },
+    subaccount_id:{type:String, required:true}
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
