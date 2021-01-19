@@ -16,7 +16,17 @@ const rave = new Ravepay(
 // Get all
 export const list = async (req, res, next)=>{
   Good.find({_id: { $exists: true }})
-    .populate("Shop", ["name"])
+    .populate({
+      path: "Shop",
+      select:["name","description","subaccount_id"],
+      populate: {
+        path: "rider",
+        select: ["_id",'subaccount_id'],
+        populate: {
+          path: "_id",
+        }
+      }
+    })
     .exec(function(err, goods) {
       return err
         ? res.status(500).json({ message: "Error getting records." })
@@ -32,7 +42,8 @@ export const list = async (req, res, next)=>{
 export const show = function (req, res) {
   var id = req.params.id;
   Good.findOne({ _id: id })
-    .populate("Shop", ["name"])
+    .populate("Shop")
+    .populate("Shop.rider")
     .exec((err, good) => {
       if (err) {
         return res.status(500).json({

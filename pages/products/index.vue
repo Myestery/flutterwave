@@ -54,7 +54,11 @@
                         class="d-flex transition-fast-in-fast-out white darken-2 v-card--reveal display-3 white--text"
                         style="height: 100%"
                       >
-                        <v-btn v-if="hover" :to="`/products/${pro._id}`" class="" outlined
+                        <v-btn
+                          v-if="hover"
+                          :to="`/products/${pro._id}`"
+                          class=""
+                          outlined
                           >VIEW</v-btn
                         >
                       </div>
@@ -62,14 +66,24 @@
                   </v-img>
                   <v-card-text class="text--primary">
                     <div>
-                      <nuxt-link :to="`/products/${pro._id}`" style="text-decoration: none">{{
-                        pro.Shop.name
-                      }}</nuxt-link>
+                      <nuxt-link
+                        :to="`/products/${pro._id}`"
+                        style="text-decoration: none"
+                        >{{ pro.Shop.name }}</nuxt-link
+                      >
                     </div>
                     <div>${{ pro.price }}</div>
                   </v-card-text>
                   <v-card-actions>
-                    <v-btn color="primary" block :to="`/shops/${pro.Shop._id}`">Visit Store</v-btn>
+                    <v-btn color="secondary" block :to="`/shops/${pro.Shop._id}`"
+                      >Visit Store</v-btn
+                    ></v-card-actions>
+                    <v-card-actions>
+                    <v-btn color="primary" block @click="Buy(pro)">{{
+                      $store.state.cart.staging[pro._id] !== true
+                        ? "Add To Cart"
+                        : "Remove from Cart"
+                    }}</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-hover>
@@ -91,7 +105,7 @@
 }
 </style>
 <script>
-import {mapState} from 'vuex'
+import { mapState } from "vuex";
 export default {
   auth: false,
   async asyncData({ $axios }) {
@@ -138,14 +152,17 @@ export default {
     },
   },
   methods: {
-    Buy(product){
-      this.$store.dispatch('cart/ADD_OR_REMOVE',product)
-      this.$forceUpdate()
-    }
+    Buy(product) {
+      this.$store.dispatch("cart/ADD_OR_REMOVE", product);
+      this.$forceUpdate();
+    },
   },
   mounted() {
-    if(this.$route.query.hasOwnProperty('category') && this.$route.query.category){
-      this.category=this.$route.query.category
+    if (
+      this.$route.query.hasOwnProperty("category") &&
+      this.$route.query.category
+    ) {
+      this.category = this.$route.query.category;
     }
   },
 };

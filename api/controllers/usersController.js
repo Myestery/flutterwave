@@ -109,7 +109,7 @@ export const new_merchant = [
     }
     // next step is to verify that this transaction was successful with flutterwave api
     try {
-      let subaccount_id
+      let subaccount_id;
       const response = await rave.VerifyTransaction.verify({
         txref: req.body.data.tx_ref
       });
@@ -148,60 +148,67 @@ export const new_merchant = [
 
         // now we will create a subaccount for the user that we'll use to pay him
         const payload = {
-          "account_bank": req.body.bank,
-          "account_number": req.body.account_number,
-          "business_name": req.body.shop_name,
-          "business_email": req.body.email,
-          "business_contact": `${req.body.surname} ${req.body.firstname}`,
-          "business_contact_mobile": req.body.phone_number,
-          "business_mobile": req.body.phone_number,
-          "country": req.body.country,
-          "split_type": "percentage",
-          "split_value": RATES.Sales.JumgaCommision * 100
-      }
-      try {
-         const resp =  await rave.Subaccount.create(payload)
-        console.log(resp);
-        subaccount_id = resp.data.subaccount_id
-      } catch (error) {
-          console.log(error)
-        }        
-        
-        //create the user's account
-        let user = new User({
-          name: {
-            surname: req.body.surname,
-            firstname: req.body.firstname
-          },
-          email: req.body.email,
-          phone_number: req.body.phone_number,
-          password: req.body.password,
-          roles: [{ role: "shop_owner" }, { role: "buyer" }],
+          account_bank: req.body.bank,
+          account_number: req.body.account_number,
+          business_name: req.body.shop_name,
+          business_email: req.body.email,
+          business_contact: `${req.body.surname} ${req.body.firstname}`,
+          business_contact_mobile: req.body.phone_number,
+          business_mobile: req.body.phone_number,
           country: req.body.country,
-          account: {
-            account_number: req.body.account_number,
-            bank: req.body.bank,
-            subaccount_id
-          }
-        });
-        var salt = bcrypt.genSaltSync(10);
-        var hash = bcrypt.hashSync(user.password, salt);
-        user.password = hash;
-        user.save((err, user) => {
-          transaction.User = user._id;
-          transaction.save();
-          shop.owner = user._id;
-          shop.subaccount_id = subaccount_id
-          shop.save();
-          user.shop = shop._id;
-          user.save();
-        });
-        let response = {};
-        response.message = "Transaction completed successfully";
-        response.shop_id = shop._id;
-        return res.json(response);
-      }
-      return res.status(403).json({ error: "Invalid transaction" });
+          split_type: "percentage",
+          split_value: RATES.Sales.JumgaCommision
+        };
+
+        axios
+          .post("https://api.flutterwave.com/v3/subaccounts", payload, {
+            headers: {
+              Authorization: `Bearer ${process.env.PRIVATE_KEY}`,
+              "Content-Type": "application/json; charset=UTF-8",
+              Accept: "*/*"
+            }
+          })
+          .then(respons => {
+            console.log(respons.data.data);
+            subaccount_id = respons.data.data.subaccount_id;
+            shop.subaccount_id = respons.data.data.subaccount_id;
+            //create the user's account
+            let user = new User({
+              name: {
+                surname: req.body.surname,
+                firstname: req.body.firstname
+              },
+              email: req.body.email,
+              phone_number: req.body.phone_number,
+              password: req.body.password,
+              roles: [{ role: "shop_owner" }, { role: "buyer" }],
+              country: req.body.country,
+              account: {
+                account_number: req.body.account_number,
+                bank: req.body.bank,
+                subaccount_id
+              }
+            });
+            var salt = bcrypt.genSaltSync(10);
+            var hash = bcrypt.hashSync(user.password, salt);
+            user.password = hash;
+            user.save((err, user) => {
+              transaction.User = user._id;
+              transaction.save();
+              shop.owner = user._id;
+              shop.save();
+              user.shop = shop._id;
+              user.save();
+            });
+            let response = {};
+            response.message = "Transaction completed successfully";
+            response.shop_id = shop._id;
+            return res.json(response);
+          })
+          .catch(err => {
+            // return res.status(401).json({ error: "Something went wrong" });
+          });
+      } else return res.status(403).json({ error: "Invalid transaction" });
     } catch (error) {
       return res.status(500).json({ error: "Unexpected error occured" });
     }
@@ -324,24 +331,7 @@ export const getBanks = async (req, res) => {
 };
 
 export const verifyBank = async (req, res) => {
-  // Verify bank account is valid with flutterwave api
-
-  // for some reason, this function is returning
-  //   {
-  //     "status": "error",
-  //     "message": "Sorry, recipient account could not be validated. Please try again",
-  //     "data": null
-  // } after trying with several account numbers, seems it works for only the test accounts
   let result = { status: true };
-  // axios.post(`https://api.flutterwave.com/v3/accounts/resolve`, {
-  //   account_number: req.body.account_number,
-  //   account_bank:req.body.account_bank
-  // })
-  // .then(resp => result = resp.data)
-  // .catch(error=> {
-  //   result = error
-  //   console.log(error)
-  // })
   return res.json({ result });
 };
 export const tester = (req, res) => {};
@@ -376,22 +366,53 @@ const middleware = (req, res) => {
   return user;
 };
 
-export const checkMail = [
-  body("email", "Please enter an Email").isLength({ min: 1 }),
-  async (req, res) => {
-    let exists = await User.findOne({ email: req.body.email }).exec();
-    let account_exist = await User.findOne({ 'account.bank':"044"}).exec();
-    if (exists !== null) {
-      console.log("email in use");
+export const checkMail = async (req, res) => {
+  let exists = await User.findOne({ email: req.body.email }).exec();
+  let account_exist = await User.findOne({
+    "account.account_number": req.body.account_number
+  }).exec();
+  // verify if email is in use already
+  if (exists !== null) {
+    console.log("email in use");
     return res.status(422).json({ error: "sorry, email already exists" });
-    }
-    if (account_exist !== null) {
-      console.log("email in use");
-      return res.status(422).json({ error: "sorry, account number already exists" });
-    }
-      return res.json({ success: "Good to go", status: true });
   }
-];
+  // check if account number is in use already
+  if (account_exist !== null) {
+    console.log("email in use");
+    return res
+      .status(422)
+      .json({ error: "sorry, account number already exists" });
+  }
+  // Verify bank account is valid with flutterwave api
+  let acc_ver_result = { status: true };
+  axios
+    .post(
+      "https://api.flutterwave.com/v3/accounts/resolve",
+      {
+        account_number: req.body.account_number,
+        account_bank: req.body.account_bank
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PRIVATE_KEY}`,
+          "Content-Type": "application/json; charset=UTF-8",
+          Accept: "*/*"
+        }
+      }
+    )
+    .then(respons => {
+      console.log(respons.data);
+      acc_ver_result = respons.data;
+      return res.json({ acc_ver_result, status: true });
+    })
+    .catch(err => {
+      console.log(err.response.data);
+      acc_ver_result = err.response.data;
+      return res
+        .status(401)
+        .json({ ...acc_ver_result, error: acc_ver_result.message });
+    });
+};
 
 export const seedDatabase = async (req, res) => {
   let riders = [
@@ -402,7 +423,7 @@ export const seedDatabase = async (req, res) => {
       email: "Ade@gmail.com",
       account_number: "0690000031",
       bank: "044",
-      subaccount_id:"RS_46A212FC6CCF28C6BF44A7FE040633B0"
+      subaccount_id: "RS_46A212FC6CCF28C6BF44A7FE040633B0"
     },
     {
       surname: "Olu",
@@ -411,7 +432,7 @@ export const seedDatabase = async (req, res) => {
       country: "NG",
       account_number: "0690000032",
       bank: "044",
-      subaccount_id:"RS_B832B81A843554C410E418EAF54C2242"
+      subaccount_id: "RS_B832B81A843554C410E418EAF54C2242"
     },
     {
       surname: "Musa",
@@ -420,7 +441,7 @@ export const seedDatabase = async (req, res) => {
       country: "NG",
       account_number: "0690000033",
       bank: "044",
-      subaccount_id:"RS_6E9D1CD2FAD0F9FD93FAB635206EB7A0"
+      subaccount_id: "RS_6E9D1CD2FAD0F9FD93FAB635206EB7A0"
     },
     {
       firstname: "Fatai",
@@ -429,7 +450,7 @@ export const seedDatabase = async (req, res) => {
       country: "NG",
       account_number: "0690000034",
       bank: "044",
-      subaccount_id:"RS_32EABB82950364E85AD5D7029DB46427"
+      subaccount_id: "RS_32EABB82950364E85AD5D7029DB46427"
     }
   ];
   for (let x = 0; x < riders.length; x++) {
@@ -448,7 +469,7 @@ export const seedDatabase = async (req, res) => {
       account: {
         account_number: riders[x].account_number,
         bank: riders[x].bank,
-        subaccount_id:riders[x].subaccount_id
+        subaccount_id: riders[x].subaccount_id
       }
     });
     user.save();

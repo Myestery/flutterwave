@@ -149,6 +149,10 @@ export default {
         ? this.cart.goods.map((x) => x.shipping_cost).reduce((x, y) => x + y)
         : 0;
     },
+    subaccounts(){
+      let accounts = []
+       this.cart.goods.map((x) => x.price * x.qty).reduce((x, y) => x + y)
+    }
   },
   mounted() {
     this.cart.goods = this.cart.goods.map((good) => ({
@@ -161,7 +165,7 @@ export default {
       ? this.cart.goods.map((good) => good._id).reduce((x, y) => `${x},${y}`)
       : "";
   },
-  data() {
+  data() { 
     return {
       image_link: "",
       goods_ids: "",

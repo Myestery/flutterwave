@@ -80,6 +80,7 @@
                           label="Select Country"
                           @change="fetchBanks"
                           v-model="country"
+                          required
                         ></v-select>
                       </v-col>
                     </v-row>
@@ -126,7 +127,7 @@
                           item-text="name"
                           v-model="bank"
                           item-value="code"
-                          :rules="nameRules"
+                          required
                         ></v-select>
                       </v-col>
                       <v-col class="col-12 col-md-5 col-sm-12">
@@ -312,20 +313,18 @@ export default {
       try {
         let response = await this.$axios.$post("/api/users/check-email", {
           email: this.email,
+          account_bank:this.bank,
+          account_number:this.account_number
         });
         this.loading = false;
         if (response.status == true) {
           this.e1 = 2;
-        } else {
-          this.loading = false;
-          this.show_error = true;
-          this.error_text = "Email ALready exists";
-        }
+        } 
       } catch (error) {
         console.log(error)
         this.loading = false;
         this.show_error = true;
-        this.error_text = "Error validating email";
+        this.error_text = error.response.data.error
       }
     },
   },
