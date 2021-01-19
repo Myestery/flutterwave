@@ -1,74 +1,71 @@
 <template>
-  <v-app>
-    <v-card
-      class="mx-auto"
-      max-width="700"
-      outlined
-      style="margin-top: 70px; width: 500px"
-    >
-      <v-list-item three-line>
-        <v-list-item-content>
-          <div class="overline mb-4">CREATE BLOG</div>
-          <v-form v-model="valid">
-            <v-container>
-              <v-text-field
-                v-model="title"
-                :rules="nameRules"
-                label="Blog Title"
-                required
-                clearable
-              ></v-text-field>
-              <v-text-field
-                v-model="body"
-                :rules="nameRules"
-                label="Write your blog here"
-                required
-                clearable
-              ></v-text-field>
-            </v-container>
-          </v-form>
-        </v-list-item-content>
-      </v-list-item>
+  <div>
+    <v-container style="margin-top: 5%">
+      <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12">
+          <v-spacer></v-spacer>
+        </div>
+        <div class="col-md-9 col-sm-9 col-xs-12">
+          <v-row dense>
+            <v-col cols="12" sm="8" class="pl-6 pt-6">
+              <p>My Orders</p>
+            </v-col>
+          </v-row>
 
-      <v-card-actions>
-        <v-btn
-          style="margin-left: 30px"
-          depressed
-          color="primary"
-          :disabled="!valid"
-          @click="post"
-          >POST</v-btn
-        >
-      </v-card-actions>
-    </v-card>
-    <v-alert dense text type="success" v-show="alert" dismissible>
-     Post Created Succesfully
-    </v-alert>
-  </v-app>
+          <v-divider></v-divider>
+
+          <div class="row text-center">
+            <div
+              class="col-md-3 col-sm-6 col-xs-12"
+              :key="pro._id"
+              v-for="pro in purchases"
+            >
+              <v-hover v-slot:default="{ hover }">
+                <v-card class="mx-auto" color="grey lighten-4" max-width="600">
+                  <v-img
+                    class="white--text align-end"
+                    :aspect-ratio="16 / 9"
+                    height="200px"
+                    :src="`/img/home/${pro.image}`"
+                  >
+                    <v-card-title>{{ pro.name }} </v-card-title>
+                    <v-expand-transition>
+                      <div
+                        v-if="hover"
+                        class="d-flex transition-fast-in-fast-out white darken-2 v-card--reveal display-3 white--text"
+                        style="height: 100%"
+                      ></div>
+                    </v-expand-transition>
+                  </v-img>
+                  <v-card-text class="text--primary">
+                    <div>
+                      <router-link
+                        :to="`/product/${pro.id}`"
+                        style="text-decoration: none"
+                        >{{ pro.name }}</router-link
+                      >
+                    </div>
+                    <div>${{ pro.price }}</div>
+                    <!-- <div>{{}}  ${{ pro.price }}</div>fcard-a -->
+                  </v-card-text>
+                </v-card>
+              </v-hover>
+            </div>
+          </div>
+        </div>
+      </div>
+    </v-container>
+  </div>
 </template>
-
 <script>
-import Logo from "~/components/Logo.vue";
-import VuetifyLogo from "~/components/VuetifyLogo.vue";
-
 export default {
-  middleware: "auth",
-  data: () => ({
-    valid: false,
-    title: "",
-    body: "",
-    alert: false,
-    nameRules: [(v) => !!v || "This Field is required"],
-  }),
-  methods: {
-    async post() {
-      let res = await this.$axios.$post("/api/blogs", {
-        title: this.title,
-        body: this.body,
-      });
-      this.alert =true
-      console.log(res);
-    },
+  async asyncData({ $axios }) {
+    let purchases = await $axios.get("/api/user/purchased-goods");
+    // console.log(purchases)
+    return {
+      purchases:[...purchases.data].map(x=>({...x.Good,qty:x.amount})),
+      // purchases
+    };
   },
 };
 </script>

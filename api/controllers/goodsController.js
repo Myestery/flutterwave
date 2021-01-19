@@ -2,9 +2,11 @@
 
 import Good from "../models/Good";
 import Shop from "../models/Shop";
+import Transaction from "../models/Transactions";
+import Purchase from "../models/Purchase";
 const validator = require("express-validator");
-const config = require("../config");
 const jwt = require("jsonwebtoken");
+const config = require("../config");
 import RATES from "../models/payRates";
 const Ravepay = require("flutterwave-node");
 const rave = new Ravepay(
@@ -14,16 +16,16 @@ const rave = new Ravepay(
 );
 
 // Get all
-export const list = async (req, res, next)=>{
-  Good.find({_id: { $exists: true }})
+export const list = async (req, res, next) => {
+  Good.find({ _id: { $exists: true } })
     .populate({
       path: "Shop",
-      select:["name","description","subaccount_id"],
+      select: ["name", "description", "subaccount_id"],
       populate: {
         path: "rider",
-        select: ["_id",'subaccount_id'],
+        select: ["_id", "subaccount_id"],
         populate: {
-          path: "_id",
+          path: "_id"
         }
       }
     })
@@ -39,7 +41,7 @@ export const list = async (req, res, next)=>{
 };
 
 // Get one
-export const show = function (req, res) {
+export const show = function(req, res) {
   var id = req.params.id;
   Good.findOne({ _id: id })
     .populate("Shop")
@@ -195,6 +197,19 @@ export const remove = (req, res) => {
 };
 
 export const buy = async (req, res) => {
+  //Get user
+  let user;
+  var token = req.headers.authorization;
+  jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function(
+    err,
+    decoded
+  ) {
+    if (err) {
+      return res.status(401).json({ message: "unauthorized" });
+    } else {
+      user = decoded;
+    }
+  });
   if (!req.body.hasOwnProperty("receipt")) {
     return res.status(422).json({ error: "Receipt is required" });
   }
@@ -206,89 +221,49 @@ export const buy = async (req, res) => {
     //this means that the transaction has been resolved already
     return res.status(403).json({ error: "Transaction already resolved" });
   }
+  const response = await rave.VerifyTransaction.verify({
+    txref: req.body.receipt.tx_ref
+  });
+  // get the goods from flutterwave response
+  const goods_bought = JSON.parse(response.data.meta[1].metavalue);
+  // return res.json(goods_bought)
   try {
-    const response = await rave.VerifyTransaction.verify({
-      txref: req.body.receipt.tx_ref
-    });
-    // get the goods from flutterwave response
-    const prod_ids = response.data.meta.goods.split(",");
-    let charged_goods = [];
-    prod_ids.forEach(async elem => {
-      charged_goods.push(
-        await(
-          Good.findOne({ _id: elem }).populate({
-            path: "Shop",
-            populate: { path: "owner" }
-          })
-        ).exec()
-      );
-    });
-    let total_amount = charged_goods
-      .map(good => good.price)
+    let total_amount_from_manifest = goods_bought
+      .map(x => x.qty * (x.price + x.shipping_cost))
       .reduce((x, y) => x + y);
     // the currency must be equal, the amount must be equal and the status must be successsful
     if (
       response.status === "success" &&
-      response.data.amount == total_amount &&
+      response.data.amount == total_amount_from_manifest &&
       response.data.currency === RATES.shop_opening_fee.currency &&
       response.data.status == "successful"
     ) {
-      // now lets transfer the moneys to the sellers, and dispatch riders
+      // now lets add a record of goods to the purchases of a user
       let transaction;
-      charged_goods.forEach(product => {
-        
-      });
       transaction = new Transaction({
-        name: "shop_opening_fee",
-        ref: req.body.data.tx_ref,
+        name: "purchase",
+        ref: req.body.receipt.tx_ref,
         used: true,
         remark: "Completed",
-        amount: RATES.shop_opening_fee.amount,
+        amount: total_amount_from_manifest,
         meta: req.body.data
       });
-      let rider = await User.findOne({
-        email: "polymenjohn1@gmail.com"
-      }).exec();
-      let shop = new Shop({
-        name: req.body.shop_name,
-        description: req.body.shop_description,
-        goods: [],
-        rider: rider._id,
-        active: true
-      });
-
-      //create the user's account
-      // let user = new User({
-      //   name: {
-      //     surname: req.body.surname,
-      //     firstname: req.body.firstname
-      //   },
-      //   email: req.body.email,
-      //   phone_number: req.body.phone_number,
-      //   password: req.body.password,
-      //   roles: [{ role: "shop_owner" }, { role: "buyer" }],
-      //   country: req.body.country,
-      //   account: {
-      //     account_number: req.body.account_number,
-      //     bank: req.body.bank
-      //   }
-      // });
-      // var salt = bcrypt.genSaltSync(10);
-      // var hash = bcrypt.hashSync(user.password, salt);
-      // user.password = hash;
-      // user.save((err, user) => {
-      //   transaction.User = user._id;
-      //   transaction.save();
-      //   shop.owner = user._id;
-      //   shop.save();
-      //   user.shop = shop._id;
-      //   user.save();
-      // });
-      // let response = {};
-      // response.message = "Transaction completed successfully";
-      // response.shop_id = shop._id;
-      // return res.json(response);
-      return res.status(403).json({ error: "Invalid transaction" });
+      transaction.save();
+      let purchase;
+      for (let i = 0; i < goods_bought.length; i++) {
+        purchase = new Purchase({
+          name: goods_bought[i].name,
+          price: goods_bought[i].price,
+          amount: goods_bought[i].qty,
+          Good: goods_bought[i]._id,
+          User: user._id,
+          transaction: transaction._id
+        });
+        purchase.save()
+      }
+      return res.json({ status: true, message: "success" });
     }
-  } catch (err) {}
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid transaction" });
+  }
 };

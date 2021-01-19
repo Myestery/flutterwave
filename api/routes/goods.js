@@ -9,7 +9,8 @@ import {
   show,
   create,
   update,
-  remove
+  remove,
+  buy
 } from "../controllers/goodsController";
 
 // Get All
@@ -28,6 +29,6 @@ router.put("/goods/:id", config.isAuthenticated, update);
 router.delete("/goods/:id", config.isAuthenticated, remove);
 
 // Buy some goods from cart
-router.delete("/goods/buy", config.isAuthenticated, remove);
+router.post("/goods/buy", config.isAuthenticated, buy);
 
 export default router;

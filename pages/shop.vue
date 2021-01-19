@@ -312,7 +312,7 @@ export default {
     ...Vuex.mapState(['auth'])
   },
   mounted() {
-    if(this.$route.query.hasOwnProperty('new')){
+    if(this.$route.query && this.$route.query.hasOwnProperty('new')){
       this.new_shop = true
     }
   },

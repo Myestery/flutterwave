@@ -43,7 +43,8 @@
                       outlined
                       type="number"
                       min="1"
-                      v-model="product.qty"
+                      @input="updateQuantity($event,product)"
+                      :value="product.qty"
                     ></v-text-field>
                   </td>
                   <td>{{ product.price * product.qty }}</td>
@@ -73,13 +74,13 @@
                 <tr>
                   <td>Shipping Charges</td>
                   <td class="text-right" style="width: 50px">
-                    ${{ shipping_cost }}
+                    ${{ shipping_total }}
                   </td>
                 </tr>
                 <tr>
                   <td>Total</td>
                   <td class="text-right" style="width: 50px">
-                    <b>${{ total + shipping_cost }}</b>
+                    <b>${{ amount_to_pay }}</b>
                   </td>
                 </tr>
               </tbody>
@@ -99,35 +100,13 @@
                 </v-card-text>
               </v-card>
             </v-dialog>
-            <flutterwave-pay-button
-              v-once
-              v-if="!show_success"
-              style="margin-top: 10%"
-              :tx_ref="generateReference()"
-              :amount="total + shipping_cost"
-              currency="USD"
-              payment_options="card, mobilemoneyghana, mpesa, ussd"
-              :customer="{
-                name: `${$store.state.auth.user.name.firstname} ${$store.state.auth.user.name.surname}`,
-                email: $store.state.auth.user.email,
-                phone_number: $store.state.auth.user.phone_number,
-              }"
-              :customizations="{
-                title: 'Checkout goods for order',
-                description: 'Pay for the goods you requested for',
-                logo: image_link,
-              }"
-              :callback="Pay"
-              :onclose="closedPaymentModal"
-              :meta="{ goods: goods_ids }"
-            >
               <v-btn
                 class="primary white--text mt- 5"
                 outlined
                 v-if="cart.goods.length"
+                @click="makePayment"
                 >PROCEED TO PAY</v-btn
               >
-            </flutterwave-pay-button>
           </div>
         </v-col>
       </v-row>
@@ -135,37 +114,64 @@
   </div>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapState,mapGetters } from "vuex";
 export default {
   computed: {
     ...mapState(["cart"]),
-    total() {
-      return this.cart.goods.length
-        ? this.cart.goods.map((x) => x.price * x.qty).reduce((x, y) => x + y)
-        : 0;
-    },
+     ...mapState('cart', ['total', 'amount_to_pay','shipping_total']),
     shipping_cost() {
       return this.cart.goods.length
         ? this.cart.goods.map((x) => x.shipping_cost).reduce((x, y) => x + y)
         : 0;
     },
-    subaccounts(){
-      let accounts = []
-       this.cart.goods.map((x) => x.price * x.qty).reduce((x, y) => x + y)
+    subaccounts() {
+      let invoices = this.cart.goods.map((x) => ({
+        price: x.price,
+        shipping_cost: x.shipping_cost,
+        subaccount_id: x.Shop.subaccount_id,
+        rider_account: x.Shop.rider._id.account.subaccount_id,
+      }));
+      let subaccounts = {};
+      let answer = [];
+      invoices.forEach((invoice) => {
+        subaccounts[invoice.subaccount_id] = subaccounts.hasOwnProperty(
+          invoice.subaccount_id
+        )
+          ? subaccounts[invoice.subaccount_id] + invoice.price
+          : invoice.price;
+        subaccounts[invoice.rider_account] = subaccounts.hasOwnProperty(
+          invoice.rider_account
+        )
+          ? subaccounts[invoice.rider_account] + invoice.price
+          : invoice.shipping_cost;
+      });
+
+      for (const key in subaccounts) {
+        answer.push({
+          id: key,
+          transaction_split_ratio:
+            (subaccounts[key] / (this.$store.state.cart.total + this.$store.state.cart.shipping_total)) * 10,
+        });
+      }
+      return answer;
+    },
+    // amount_to_pay() {
+    //   return this.store.cart.amount_to_pay
+    // },
+    goods_manifest(){
+     return JSON.stringify(this.$store.state.cart.goods.map(x=>({...x,qty:x.qty})))
+    },
+    goods_qty(){
+     return JSON.stringify(this.$store.state.cart.goods.map(x=>x.qty))
     }
   },
   mounted() {
-    this.cart.goods = this.cart.goods.map((good) => ({
-      ...good,
-      qty: 1,
-      total: good.price,
-    }));
     this.image_link = `${window.location.origin}/img/logo1.svg`;
     this.goods_ids = this.cart.goods.length
       ? this.cart.goods.map((good) => good._id).reduce((x, y) => `${x},${y}`)
       : "";
   },
-  data() { 
+  data() {
     return {
       image_link: "",
       goods_ids: "",
@@ -183,13 +189,18 @@ export default {
           goods: this.cart.goods,
           receipt,
         });
+        this.$router.push('/user/home')
       } catch (error) {
         console.log(error);
+        return;
       }
+      console.log(response)
       this.$store.dispatch("cart/EMPTY");
       this.show_success = true;
+      setTimeout(()=>{
+        this.$router.push('/user/home')
+      })
     },
-
     closedPaymentModal() {
       console.log("payment is closed");
     },
@@ -197,6 +208,32 @@ export default {
       let date = new Date();
       return date.getTime().toString();
     },
+    makePayment() {
+      window.FlutterwaveCheckout({
+        public_key: "FLWPUBK_TEST-101e016c28e3690da06760dc8055e412-X",
+        tx_ref: this.generateReference(),
+        amount: this.amount_to_pay,
+        currency: "USD",
+        payment_options: "card,ussd,qr,barter",
+        customer: {
+          name: `${this.$store.state.auth.user.name.firstname} ${this.$store.state.auth.user.name.surname}`,
+          email: this.$store.state.auth.user.email,
+          phone_number: this.$store.state.auth.user.phone_number,
+        },
+        meta:{metaname:"manifest",metavalue:this.goods_manifest},
+        customizations: {
+          title: "Checkout goods for order",
+          description: "Pay for the goods you requested for",
+          logo: this.image_link,
+        },
+        subaccounts: this.subaccounts,
+        callback: this.Pay,
+      });
+    },
+    updateQuantity(e,product){
+      console.log(e)
+      this.$store.commit('cart/updateQuantity', {value:e,product})
+    }
   },
 };
 </script>

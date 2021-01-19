@@ -74,10 +74,6 @@
                     </div>
                     <div>${{ pro.price }}</div>
                   </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="secondary" block :to="`/shops/${pro.Shop._id}`"
-                      >Visit Store</v-btn
-                    ></v-card-actions>
                     <v-card-actions>
                     <v-btn color="primary" block @click="Buy(pro)">{{
                       $store.state.cart.staging[pro._id] !== true

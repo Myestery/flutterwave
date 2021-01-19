@@ -12,7 +12,8 @@ import {
   verifyBank,
   new_merchant,
   checkMail,
-  seedDatabase
+  seedDatabase,
+  getPurchases
 } from "../controllers/usersController";
 
 //Register
@@ -41,5 +42,8 @@ router.post("/users/verify-bank-details",verifyBank)
 //Receive payment
 router.post("/users/register-as-merchant", new_merchant)
 
-router.post("/users/check-email",checkMail)
+router.post("/users/check-email", checkMail)
+
+// Get all my purchases
+router.get("/user/purchased-goods", getPurchases);
 export default router;

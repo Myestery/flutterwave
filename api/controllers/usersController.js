@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 var multer = require("multer");
 import axios from "axios";
 import RATES from "../models/payRates";
+import Purchase from "../models/Purchase";
 const Ravepay = require("flutterwave-node");
 const rave = new Ravepay(
   process.env.PUBLIC_KEY,
@@ -476,3 +477,25 @@ export const seedDatabase = async (req, res) => {
   }
   return res.json({ message: "database seeded successfully" });
 };
+
+export const getPurchases = async (req, res) => {
+  let user;
+  var token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).json({ message: "unauthorized" });
+  }
+  jwt.verify(token.replace(/^Bearer\s/, ""), config.authSecret, function(
+    err,
+    decoded
+  ) {
+    if (err) {
+      return res.status(401).json({ message: "unauthorized" });
+    } else {
+      user = decoded;
+    }
+  });
+  const purchases = await Purchase.find({ User: user._id })
+  .populate('Good')
+  .exec()
+  return res.json(purchases)
+}
