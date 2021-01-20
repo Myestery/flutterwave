@@ -10,11 +10,16 @@ You can also pull this repository and run
 send a post request to '/seedDatabase' to get the accounts of dispatch riders
 
 # Softwares / Technology employed
-*Nuxtjs
-*Vuejs
-*Vuetify 
-*Ui template by https://madewithvuejs.com/shipit
+`Nuxtjs`
+###
+`Vuejs`
+###
+`Vuetify`
+###
+*Ui template by https://madewithvuejs.com/shipit*
+###
 Flutterwave node express sdk
+###
 Flutterwave vue v3 helper
 
 # Getting started
@@ -34,11 +39,11 @@ Click on the handbag icon above, select a product , add to cart and then proceed
 The checkout was made using split transactions and sub account ids,
 so you must have signed up using areal test account as it will be validated.
 
-#How to add Goods
+# How to add Goods
 go to /shop with a logged in account
 press the add goods button
 
-#Sharing formula
+# Sharing formula
 For shop opening fee payments, i used the normal flutterwave checkout card payments
 for cart/goods buying, i used split accounts
 
